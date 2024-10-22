@@ -8,7 +8,8 @@ class InfraestructuraUsuario:
 
     def __init__(self) -> None:
         pass
-        
+
+    #-------------------------------------------    
     def consultar_usuario_todo(self):
         results = []
         connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
@@ -91,7 +92,7 @@ class InfraestructuraUsuario:
                 }
             )
             
-            resultado = f"Ingresar Usuario Exitoso: {result.acknowledged}, ID insertado: {result.inserted_id}"
+            resultado = f"Ingresar Usuario Exitoso: {result.acknowledged}, ID insertado: {result.inserted_id} tipo de objeto {type(result)}"
         except Exception as ex:
             resultado = f"Ingresar Usuario Fallido: {ex}"
         finally:

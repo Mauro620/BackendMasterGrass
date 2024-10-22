@@ -79,21 +79,22 @@ class InfraestructuraTerreno:
                     "tipoPasto": modelo_terreno.tipoPasto,
                     "precio": modelo_terreno.precio,
                     "estadoDelTerreno": modelo_terreno.estadoDelTerreno,
-                    "historialAlquileres": {
-                        "idAlquiler": modelo_terreno.historialAlquileres.idAlquiler,
-                        "usuario": {
-                            "idUsuario": modelo_terreno.historialAlquileres.usuario.idUsuario,
-                            "nombreUsuario": modelo_terreno.historialAlquileres.usuario.nombreUsuario
-                        },
-                        "periodo": {
-                            "fechaInicio": modelo_terreno.historialAlquileres.fechaInicio,
-                            "fechaFin": modelo_terreno.historialAlquileres.fechaFin
-                        }
-                    }
+                    "historialAlquileres": [
+                        # {
+                        #     "idAlquiler": modelo_terreno.historialAlquileres.idAlquiler,
+                        #     "usuario": {
+                        #         "idUsuario": modelo_terreno.historialAlquileres.usuario.idUsuario,
+                        #         "nombreUsuario": modelo_terreno.historialAlquileres.usuario.nombreUsuario
+                        #     },
+                        #     "periodo": {
+                        #         "fechaInicio": modelo_terreno.historialAlquileres.periodo.fechaInicio,
+                        #         "fechaFin": modelo_terreno.historialAlquileres.periodo.fechaFin
+                        #     }
+                        # } 
+                    ]
                 }
             )
-            
-            resultado = f"Ingresar Terreno Exitoso: {result.acknowledged}, ID insertado: {result.inserted_id}"
+            resultado = f"Ingresar Terreno Exitoso: {result}"
         except Exception as ex:
             resultado = f"Ingresar Terreno Fallido: {ex}"
         finally:

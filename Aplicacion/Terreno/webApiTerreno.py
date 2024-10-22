@@ -14,7 +14,6 @@ app = APIRouter() #Definir urls para incluir en el main
 
 @app.get(
     "/consultar_terrenos",
-    response_model=list,
     tags=["Terreno"]
 )
 async def consultarTodosLosTerrenos():
@@ -24,10 +23,10 @@ async def consultarTodosLosTerrenos():
 # ------------------ Ingresar un nuevo terreno -------------------------
 @app.post(
     "/ingresar_terreno",
-    response_model=ModeloTerreno,
+    response_model= list,
     tags=["Terreno"]
 )
-async def ingresarTerreno(modeloTerreno = ModeloTerreno):
+async def ingresarTerreno(modeloTerreno : ModeloTerreno):
     infraestructuraTerreno = InfraestructuraTerreno()
     return infraestructuraTerreno.ingresar_terreno(modeloTerreno)
 

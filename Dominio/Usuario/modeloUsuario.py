@@ -26,7 +26,7 @@ class ModeloUsuario(BaseModel):
     telefono: str
     ganado: ModeloGanado
     tipoUsuario: str
-    historialAlquileres: ModeloHistorialAlquiler
+    historialAlquileres: list[ModeloHistorialAlquiler]  # Ahora es una lista de historial de alquileres
     
 
     @staticmethod
@@ -47,10 +47,12 @@ class ModeloUsuario(BaseModel):
                 )
             ),
             "tipoUsuario": str(usuario['tipoUsuario']),
-            "historialAlquileres": ModeloHistorialAlquiler(
-                idAlquiler=str(usuario['historialAlquileres'][0]['idAlquiler']),  # Accedemos al primer elemento de la lista 'historialAlquileres'
-                idTerreno=str(usuario['historialAlquileres'][0]['idTerreno']),
-                fechaInicio=str(usuario['historialAlquileres'][0]['fechaInicio']),
-                fechaFin=str(usuario['historialAlquileres'][0]['fechaFin'])
-            )
+            "historialAlquileres": [  # Iteramos sobre la lista de 'historialAlquileres'
+                ModeloHistorialAlquiler(
+                    idAlquiler=str(alquiler['idAlquiler']),
+                    idTerreno=str(alquiler['idTerreno']),
+                    fechaInicio=str(alquiler['fechaInicio']),
+                    fechaFin=str(alquiler['fechaFin'])
+                ) for alquiler in usuario['historialAlquileres']
+            ]
         }

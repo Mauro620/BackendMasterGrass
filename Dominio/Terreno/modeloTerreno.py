@@ -22,14 +22,14 @@ class ModeloHistorialAlquileres(BaseModel):
     periodo: ModeloPeriodo
 
 class ModeloTerreno(BaseModel):
-    _id: str  # Convertido a str para asegurar serialización
+    _id: ObjectId
     idTerreno: str
     ubicacion: ModeloUbicacion
     tamano: int  # Ahora es str, basado en tu documento
     tipoPasto: str
     precio: float  # Ahora es float, basado en tu documento
     estadoDelTerreno: str  # Corregido el nombre para reflejar tu documento
-    historialAlquileres: List[ModeloHistorialAlquileres]  # Lista de historial de alquileres
+    historialAlquileres: ModeloHistorialAlquileres # Lista de historial de alquileres
 
     @staticmethod
     def terreno_helper(terreno):

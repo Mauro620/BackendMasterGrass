@@ -1,15 +1,16 @@
 # apiusuario:
 
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 
 from Dominio.Usuario.modeloUsuario import ModeloUsuario
-from Infraestructura.Usuario.InfraestructuraUsuario import InfraestructuraUsuarioPene
+from Infraestructura.Usuario.infraestructuraUsuario import InfraestructuraUsuarioPene
 
 app: FastAPI = FastAPI(
     title="API Usuario",
     description="Hola"
 )
 
+app = APIRouter()
 ###################################
 
 # ---------------------- Consultar Todo ---------------------------

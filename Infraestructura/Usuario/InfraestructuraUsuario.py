@@ -4,7 +4,7 @@ import pymongo
 from pymongo import MongoClient
 
 #------------------ Usuario ------------------#
-class InfraestructuraUsuarioPene:
+class InfraestructuraUsuario:
 
     def __init__(self) -> None:
         pass
@@ -144,7 +144,7 @@ class InfraestructuraUsuarioPene:
             client.close()
         return resultado
 
-    def retirar_usuario(self, id:str):
+    def eliminar_usuario(self, id:str):
         resultado = []
         connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
         database_name = "MasterGrass"

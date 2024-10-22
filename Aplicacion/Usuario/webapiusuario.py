@@ -3,7 +3,7 @@
 from fastapi import FastAPI, APIRouter
 
 from Dominio.Usuario.modeloUsuario import ModeloUsuario
-from Infraestructura.Usuario.infraestructuraUsuario import InfraestructuraUsuarioPene
+from Infraestructura.Usuario.infraestructuraUsuario import InfraestructuraUsuario
 
 app: FastAPI = FastAPI(
     title="API Usuario",
@@ -13,57 +13,68 @@ app: FastAPI = FastAPI(
 app = APIRouter()
 ###################################
 
-# ---------------------- Consultar Todo ---------------------------
+# ---------------------- Consultar todos los usuarios ---------------------------
 @app.get(
-    "/consultarusuariotodo",
+    "/consultar_usuario_todo",
     response_model=list,
     summary="Consultar Usuario Todo",
     description="Consultar Usuario Todo",
     tags=["Usuario"]
 )
 async def consultar_usuario_todo():
-    infraestructurausuario = InfraestructuraUsuarioPene()
-    return infraestructurausuario.consultar_usuario_todo()
+    InfraestructuraUsuario = InfraestructuraUsuario()
+    return InfraestructuraUsuario.consultar_usuario_todo()
 
-###################################
+# ------------------ Consultar usuario en especifico -------------------------
 
 # Get
 @app.get(
-    "/consultarusuarioid",
+    "/consultar_usuario_id",
     response_model=list,	
     summary="Consultar Usuario Id",
     description="Consultar Usuario Id",
     tags=["Usuario"]
 )
 async def consultar_usuario_id(id:str):
-    infraestructurausuario = InfraestructuraUsuarioPene()
-    return infraestructurausuario.consultar_usuario_id(id)
+    infraestructuraUsuario = InfraestructuraUsuario()
+    return infraestructuraUsuario.consultar_usuario_id(id)
 
 
-###################################
+# ------------------ Ingresar usuario -------------------------
 
 # Post
 @app.post(
-    "/ingresarusuario",
+    "/ingresar_usuario",
     summary="Ingresar Usuario",
     description="Ingresar Usuario",
     tags=["Usuario"]
 )
 async def ingresar_usuario(modelousuario: ModeloUsuario):
-    infraestructurausuario = InfraestructuraUsuarioPene()
-    return infraestructurausuario.ingresar_usuario(modelousuario)
+    infraestructuraUsuario = InfraestructuraUsuario()
+    return infraestructuraUsuario.ingresar_usuario(modelousuario)
 
-###################################
+# ------------------ Modificar usuario -------------------------
 
 #Metodo PUT
 @app.put(
-    "/modificarusuario",
+    "/modificar_usuario",
     summary="Modificar Usuario",
     description="Modificar Usuario",
     tags=["Usuario"]
 )
 async def modificar_usuario(id:str, modelousuario: ModeloUsuario):
-    infraestructurausuario = InfraestructuraUsuarioPene()
-    return infraestructurausuario.modificar_usuario (id, modelousuario)
+    infraestructuraUsuario = InfraestructuraUsuario()
+    return infraestructuraUsuario.modificar_usuario (id, modelousuario)
 
-###################################
+# ------------------ Remover un usuario pasandole un id -------------------------
+
+# Delete
+@app.delete(
+    "/eliminar_usuario",
+    summary="Retirar Usuario",
+    description="Retirar Usuario",
+    tags=["Usuario"]
+)
+async def eliminar_usuario(id:str):
+    infraestructuraUsuario = InfraestructuraUsuario()
+    return infraestructuraUsuario.eliminar_usuario(id)

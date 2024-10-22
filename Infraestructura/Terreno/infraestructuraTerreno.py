@@ -65,10 +65,26 @@ class InfraestructuraTerreno:
             db = client[database_name]
             col = db[collection_name]
             
+            # Preparar el historial de alquileres si existe
+            historial_alquileres = []
+            if modelo_terreno.historialAlquileres:
+                for alquiler in modelo_terreno.historialAlquileres:
+                    historial_alquileres.append({
+                        "idAlquiler": alquiler.idAlquiler,
+                        "usuario": {
+                            "idUsuario": alquiler.usuario.idUsuario,
+                            "nombreUsuario": alquiler.usuario.nombreUsuario
+                        },
+                        "periodo": {
+                            "fechaInicio": alquiler.periodo.fechaInicio,
+                            "fechaFin": alquiler.periodo.fechaFin
+                        }
+                    })
+            
             # Insertar los datos usando la estructura de tu ModeloTerreno
             result = col.insert_one(
                 {
-                    "IdTerreno": modelo_terreno.idTerreno,
+                    "idTerreno": modelo_terreno.idTerreno,
                     "ubicacion": {
                         "Pais": modelo_terreno.ubicacion.Pais,
                         "Departamento": modelo_terreno.ubicacion.Departamento,
@@ -79,28 +95,17 @@ class InfraestructuraTerreno:
                     "tipoPasto": modelo_terreno.tipoPasto,
                     "precio": modelo_terreno.precio,
                     "estadoDelTerreno": modelo_terreno.estadoDelTerreno,
-                    "historialAlquileres": [
-                        # {
-                        #     "idAlquiler": modelo_terreno.historialAlquileres.idAlquiler,
-                        #     "usuario": {
-                        #         "idUsuario": modelo_terreno.historialAlquileres.usuario.idUsuario,
-                        #         "nombreUsuario": modelo_terreno.historialAlquileres.usuario.nombreUsuario
-                        #     },
-                        #     "periodo": {
-                        #         "fechaInicio": modelo_terreno.historialAlquileres.periodo.fechaInicio,
-                        #         "fechaFin": modelo_terreno.historialAlquileres.periodo.fechaFin
-                        #     }
-                        # } 
-                    ]
+                    "historialAlquileres": historial_alquileres  # Se asigna el array construido
                 }
             )
-            resultado = f"Ingresar Terreno Exitoso: {result}"
+            resultado = f"Ingresar Terreno Exitoso: {result.acknowledged}"
         except Exception as ex:
             resultado = f"Ingresar Terreno Fallido: {ex}"
         finally:
             client.close()
         
         return resultado
+
     
     #---------------------------------------------
     def modificar_terreno(self, id:str, modelo_terreno: ModeloTerreno):
@@ -129,7 +134,7 @@ class InfraestructuraTerreno:
                     "tamano": modelo_terreno.tamano,
                     "tipoPasto": modelo_terreno.tipoPasto,
                     "precio": modelo_terreno.precio,
-                    "estadoTerreno": modelo_terreno.estadoTerreno,
+                    "estadoDelTerreno": modelo_terreno.estadoDelTerreno,
                     "historialAlquileres": {
                         "idAlquiler": modelo_terreno.historialAlquileres.idAlquiler,
                         "usuario": {
@@ -137,8 +142,8 @@ class InfraestructuraTerreno:
                             "nombreUsuario": modelo_terreno.historialAlquileres.usuario.nombreUsuario
                         },
                         "periodo": {
-                            "fechaInicio": modelo_terreno.historialAlquileres.fechaInicio,
-                            "fechaFin": modelo_terreno.historialAlquileres.fechaFin
+                            "fechaInicio": modelo_terreno.historialAlquileres.periodo.fechaInicio,
+                            "fechaFin": modelo_terreno.historialAlquileres.periodo.fechaFin
                         }
                     }
                 }

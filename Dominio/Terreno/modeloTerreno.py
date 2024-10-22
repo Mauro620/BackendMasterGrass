@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from bson import ObjectId
 from typing import List
 
@@ -23,38 +23,60 @@ class ModeloHistorialAlquileres(BaseModel):
 
 class ModeloTerreno(BaseModel):
     _id: ObjectId
-    idTerreno: str
+    idTerreno: str = Field()
     ubicacion: ModeloUbicacion
     tamano: int  # Ahora es str, basado en tu documento
     tipoPasto: str
     precio: float  # Ahora es float, basado en tu documento
     estadoDelTerreno: str  # Corregido el nombre para reflejar tu documento
-    historialAlquileres: ModeloHistorialAlquileres # Lista de historial de alquileres
-
+    historialAlquileres: List[ModeloHistorialAlquileres] # Lista de historial de alquileres
+    
     @staticmethod
     def terreno_helper(terreno):
         return {
-            "_id": str(terreno['_id']),  # Convertir ObjectId a str
+            "_id": str(terreno['_id']),
             "idTerreno": str(terreno['idTerreno']),
-            "ubicacion": ModeloUbicacion(
-                Pais=str(terreno['ubicacion']['Pais']),
-                Departamento=str(terreno['ubicacion']['Departamento']),
-                Ciudad=str(terreno['ubicacion']['Ciudad']),
-                Direccion=str(terreno['ubicacion']['Direccion'])
-            ),
-            "tamano": int(terreno['tamano']),
-            "tipoPasto": str(terreno['tipoPasto']),
-            "precio": float(terreno['precio']),
-            "estadoDelTerreno": str(terreno['estadoDelTerreno']),
-            "historialAlquileres": ModeloHistorialAlquileres(
-                idAlquiler= str(terreno["historialAlquileres"][0]["idAlquiler"]),
-                usuario= ModeloUsuario(
-                    idUsuario= str(terreno['historialAlquileres'][0]['usuario']['idUsuario']),
-                    nombreUsuario= str(terreno['historialAlquileres'][0]['usuario']['nombreUsuario'])
-                ),
-                periodo=ModeloPeriodo(
-                    fechaInicio= str(terreno['historialAlquileres'][0]['periodo']['fechaInicio']),
-                    fechaFin= str(terreno['historialAlquileres'][0]['periodo']['fechaFin']),
-                )
-            )
+            "ubicacion": terreno['ubicacion'],  # Puedes utilizarlo directamente ya que es un diccionario
+            "tamano": terreno['tamano'],
+            "tipoPasto": terreno['tipoPasto'],
+            "precio": terreno['precio'],
+            "estadoDelTerreno": terreno['estadoDelTerreno'],
+            "historialAlquileres": [
+                {
+                    "idAlquiler": alquiler["idAlquiler"],
+                    "usuario": {
+                        "idUsuario": alquiler["usuario"]["idUsuario"],
+                        "nombreUsuario": alquiler["usuario"]["nombreUsuario"]
+                    },
+                    "periodo": {
+                        "fechaInicio": alquiler["periodo"]["fechaInicio"],
+                        "fechaFin": alquiler["periodo"]["fechaFin"],                        
+                    }
+                } for alquiler in terreno.get("historialAlquileres", []) 
+            ]
         }
+
+    @staticmethod
+    def terreno_helper_ingresar(terreno):
+        return {
+            "_id": str(terreno['_id']),
+            "idTerreno": str(terreno['idTerreno']),
+            "ubicacion": terreno['ubicacion'],  # Puedes utilizarlo directamente ya que es un diccionario
+            "tamano": terreno['tamano'],
+            "tipoPasto": terreno['tipoPasto'],
+            "precio": terreno['precio'],
+            "estadoDelTerreno": terreno['estadoDelTerreno'],
+            "historialAlquileres": [
+                {
+                    "idAlquiler": str(terreno["idAlquiler"]),
+                    "usuario": {
+                        "idUsuario": terreno["usuario"]["idUsuario"],
+                        "nombreUsuario": terreno["usuario"]["nombreUsuario"]
+                    },
+                    "periodo": {
+                        "fechaInicio": terreno["periodo"]["fechaInicio"],
+                        "fechaFin": terreno["periodo"]["fechaFin"]
+                    }
+                }
+            ]
+        }, f"esto trae terreno.get {terreno.get}"

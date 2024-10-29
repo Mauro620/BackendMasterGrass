@@ -1,7 +1,6 @@
 from Dominio.Terreno.modeloTerreno import ModeloTerreno
 from bson import ObjectId
 import pymongo
-from pymongo import MongoClient
 
 #------------------ Terreno ------------------#
 class InfraestructuraTerreno:
@@ -108,52 +107,64 @@ class InfraestructuraTerreno:
 
     
     #---------------------------------------------
-    def modificar_terreno(self, id:str, modelo_terreno: ModeloTerreno):
+    def modificar_terreno(self, id: str, modelo_terreno: ModeloTerreno):
         resultado = []
         connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
         database_name = "MasterGrass"
         collection_name = "Terreno"
         client = pymongo.MongoClient(connection_string)
+
         try:
             db = client[database_name]
             col = db[collection_name]
-            result = col.update_many(
+
+            # Preparar el historial de alquileres si existe
+            historial_alquileres = []
+            if modelo_terreno.historialAlquileres:
+                for alquiler in modelo_terreno.historialAlquileres:
+                    historial_alquileres.append({
+                        "idAlquiler": alquiler.idAlquiler,
+                        "usuario": {
+                            "idUsuario": alquiler.usuario.idUsuario,
+                            "nombreUsuario": alquiler.usuario.nombreUsuario
+                        },
+                        "periodo": {
+                            "fechaInicio": alquiler.periodo.fechaInicio,
+                            "fechaFin": alquiler.periodo.fechaFin
+                        }
+                    })
+
+            # Realizar la actualización
+            result = col.update_one(
                 {
                     "_id": ObjectId(id)
                 },
                 {
-                    "$set":
-                    {
-                    "IdTerreno": modelo_terreno.idTerreno,
-                    "ubicacion": {
-                        "Pais": modelo_terreno.ubicacion.Pais,
-                        "Departamento": modelo_terreno.ubicacion.Departamento,
-                        "Ciudad": modelo_terreno.ubicacion.Ciudad,
-                        "Direccion": modelo_terreno.ubicacion.Direccion
-                    },
-                    "tamano": modelo_terreno.tamano,
-                    "tipoPasto": modelo_terreno.tipoPasto,
-                    "precio": modelo_terreno.precio,
-                    "estadoDelTerreno": modelo_terreno.estadoDelTerreno,
-                    "historialAlquileres": {
-                        "idAlquiler": modelo_terreno.historialAlquileres.idAlquiler,
-                        "usuario": {
-                            "idUsuario": modelo_terreno.historialAlquileres.usuario.idUsuario,
-                            "nombreUsuario": modelo_terreno.historialAlquileres.usuario.nombreUsuario
+                    "$set": {
+                        "idTerreno": modelo_terreno.idTerreno,
+                        "ubicacion": {
+                            "Pais": modelo_terreno.ubicacion.Pais,
+                            "Departamento": modelo_terreno.ubicacion.Departamento,
+                            "Ciudad": modelo_terreno.ubicacion.Ciudad,
+                            "Direccion": modelo_terreno.ubicacion.Direccion
                         },
-                        "periodo": {
-                            "fechaInicio": modelo_terreno.historialAlquileres.periodo.fechaInicio,
-                            "fechaFin": modelo_terreno.historialAlquileres.periodo.fechaFin
-                        }
+                        "tamano": modelo_terreno.tamano,
+                        "tipoPasto": modelo_terreno.tipoPasto,
+                        "precio": modelo_terreno.precio,
+                        "estadoDelTerreno": modelo_terreno.estadoDelTerreno,
+                        "historialAlquileres": historial_alquileres  # Se asigna el array construido
                     }
                 }
-                })
-            resultado = f"Modificar Terreno Exitoso: {result.acknowledged, result.modified_count}"
+            )
+
+            resultado = f"Modificar Terreno Exitoso: acknowledged: {result.acknowledged}, modified_count: {result.modified_count}"
         except Exception as ex:
             resultado = f"Modificar Terreno Fallido: {ex}"
         finally:
             client.close()
+
         return resultado
+
 
 
     def eliminar_terreno(self, id:str):

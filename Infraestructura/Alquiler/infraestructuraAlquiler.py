@@ -22,7 +22,7 @@ class InfraestructuraAlquiler:
             result = col.find()
             
             for item in list(result):
-                results.append(ModeloAlquiler.Alquiler_helper(item))
+                results.append(ModeloAlquiler.alquiler_helper(item))
         
         except Exception as ex:
             print(f"Consultar Alquiler Todo Fallido: {ex}")
@@ -45,7 +45,7 @@ class InfraestructuraAlquiler:
                     "idAlquiler": id
                 })
             for item in list(result):
-                resultado.append(ModeloAlquiler.Alquiler_helper(item))
+                resultado.append(ModeloAlquiler.alquiler_helper(item))
             print(f"Consultar Alquiler Id Exitoso")
         except Exception as ex:
             resultado = f"Consultar Alquiler Id Fallido: {ex}"

@@ -13,7 +13,7 @@ app = APIRouter()
 
 # ---------------------- Consultar todos los alquileres ---------------------------
 @app.get(
-    "/consultar_ualquiler_todo",
+    "/consultar_alquiler_todo",
     response_model=list,
     summary="Consultar Alquiler Todo",
     description="Consultar Alquiler Todo",

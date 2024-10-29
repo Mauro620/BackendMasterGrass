@@ -43,7 +43,6 @@ async def consultarTerrenoId(id:str):
 # ------------------ Modificar un terreno seleccionado -------------------------
 @app.put(
     "/modificar_terreno",
-    response_model=list,
     tags=["Terreno"]
 )
 async def modificarTerreno(id:str, modeloTerreno = ModeloTerreno):

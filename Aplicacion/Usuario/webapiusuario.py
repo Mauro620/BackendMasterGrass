@@ -22,8 +22,8 @@ app = APIRouter()
     tags=["Usuario"]
 )
 async def consultar_usuario_todo():
-    InfraestructuraUsuario = InfraestructuraUsuario()
-    return InfraestructuraUsuario.consultar_usuario_todo()
+    infraestructuraUsuario = InfraestructuraUsuario()
+    return infraestructuraUsuario.consultar_usuario_todo()
 
 # ------------------ Consultar usuario en especifico -------------------------
 

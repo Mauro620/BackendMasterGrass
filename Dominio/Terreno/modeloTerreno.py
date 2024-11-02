@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from typing import List
+from datetime import datetime
 
 class ModeloUbicacion(BaseModel):
     Pais: str
@@ -13,8 +14,8 @@ class ModeloUsuario(BaseModel):
     nombreUsuario: str
 
 class ModeloPeriodo(BaseModel):
-    fechaInicio: str
-    fechaFin: str
+    fechaInicio: datetime
+    fechaFin: datetime
 
 class ModeloHistorialAlquileres(BaseModel):
     idAlquiler: str
@@ -28,7 +29,6 @@ class ModeloTerreno(BaseModel):
     tamano: int  # Ahora es str, basado en tu documento
     tipoPasto: str
     precio: float  # Ahora es float, basado en tu documento
-    estadoDelTerreno: str  # Corregido el nombre para reflejar tu documento
     historialAlquileres: List[ModeloHistorialAlquileres] # Lista de historial de alquileres
     
     @staticmethod
@@ -40,7 +40,6 @@ class ModeloTerreno(BaseModel):
             "tamano": terreno['tamano'],
             "tipoPasto": terreno['tipoPasto'],
             "precio": terreno['precio'],
-            "estadoDelTerreno": terreno['estadoDelTerreno'],
             "historialAlquileres": [
                 {
                     "idAlquiler": alquiler["idAlquiler"],

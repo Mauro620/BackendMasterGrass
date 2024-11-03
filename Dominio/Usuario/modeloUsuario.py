@@ -5,13 +5,13 @@ from typing import List
 
 
 class ModeloIndividuo(BaseModel):
-    serieIndividuo: str
+    serieIndividuo: int
 
 class ModeloTerreno(BaseModel):
     idTerreno: str
 
 class ModeloCuidados(BaseModel):
-    serieIndividuo: ModeloIndividuo
+    individuo: ModeloIndividuo
     tituloCaso: str
     descripcion: str
 
@@ -49,7 +49,7 @@ class ModeloUsuario(BaseModel):
                 cantidad=g['cantidad'],
                 registrarCuidadoEspecial=[
                     ModeloCuidados(
-                        serieIndividuo=ModeloIndividuo(serieIndividuo=str(ind['serieIndividuo'])),
+                        individuo=ModeloIndividuo(serieIndividuo=int(ind['serieIndividuo'])),
                         tituloCaso=str(c['tituloCaso']),
                         descripcion=str(c['descripcion'])
                     ) for c in g.get('registrarCuidadoEspecial', [])
@@ -64,7 +64,7 @@ class ModeloUsuario(BaseModel):
 
         return {
             "_id": str(usuario['_id']),
-            "IdUsuario": str(usuario.get('IdUsuario', '')),
+            "idUsuario": str(usuario.get('idUsuario', '')),
             "nombreUsuario": str(usuario['nombreUsuario']),
             "email": str(usuario['email']),
             "telefono": str(usuario['telefono']),

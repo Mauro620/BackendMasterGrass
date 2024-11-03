@@ -79,10 +79,10 @@ class InfraestructuraUsuario:
                         "registrarCuidadoEspecial": [
                             {
                                 "individuos": [
-                                    {"serieIndividuo": cu.serieIndividuo}
+                                    {"serieIndividuo": cu.individuo}
                                     for cu in g.registrarCuidadoEspecial
                                 ],
-                                "tituloCaso": g.registrarCuidadoEspecial[0].tituloCuidado,
+                                "tituloCaso": g.registrarCuidadoEspecial[0].tituloCaso,
                                 "descripcion": g.registrarCuidadoEspecial[0].descripcion
                             }
                             for g in modelo_usuario.ganado

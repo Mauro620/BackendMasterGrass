@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 from bson import ObjectId
-from typing import List
+from typing import List, Optional
+from datetime import datetime
 
 class ModeloGanado(BaseModel):
-    especie: str
-    cantidad: int
+    idGanado: str
 
 class ModeloUsuario(BaseModel):
     idUsuario: str
@@ -14,25 +14,46 @@ class ModeloUsuario(BaseModel):
     ganado: List[ModeloGanado]
 
 class ModeloPeriodo(BaseModel):
-    fechaInicio: str
-    fechaFin: str
+    fechaInicio: datetime
+    fechaFin: datetime
+
+    @classmethod
+    def from_bson(cls, periodo):
+        """Convierte fechas BSON a datetime correctamente."""
+        fecha_inicio = periodo['fechaInicio']['$date'] if isinstance(periodo['fechaInicio'], dict) and '$date' in periodo['fechaInicio'] else periodo['fechaInicio']
+        fecha_fin = periodo['fechaFin']['$date'] if isinstance(periodo['fechaFin'], dict) and '$date' in periodo['fechaFin'] else periodo['fechaFin']
+        
+        # Convertir a datetime si es necesario
+        if isinstance(fecha_inicio, str):
+            fecha_inicio = datetime.fromisoformat(fecha_inicio)
+        if isinstance(fecha_fin, str):
+            fecha_fin = datetime.fromisoformat(fecha_fin)
+
+        return cls(
+            fechaInicio=fecha_inicio,
+            fechaFin=fecha_fin
+        )
 
 class ModeloTerreno(BaseModel):
     idTerreno: str
     precio: float
 
 class ModeloAlquiler(BaseModel):
-    id: str  # ObjectId as string
+    _id: str  # ObjectId as string
     idAlquiler: str
     usuario: ModeloUsuario
     terreno: ModeloTerreno
     periodo: ModeloPeriodo
-    pagoTotal: float
+    tipoPago: str
+    estadoTransaccion: str
+    entidad: str
+    precioTotal: float
+    calificacion: Optional[int]
 
     @staticmethod
     def alquiler_helper(alquiler):
         return {
-            "id": str(alquiler["_id"]),  # Convert ObjectId to string
+            "id": str(alquiler["_id"]), 
             "idAlquiler": str(alquiler["idAlquiler"]),
             "usuario": ModeloUsuario(
                 idUsuario=str(alquiler['usuario']['idUsuario']),
@@ -40,17 +61,17 @@ class ModeloAlquiler(BaseModel):
                 email=str(alquiler['usuario']['email']),
                 telefono=str(alquiler['usuario']['telefono']),
                 ganado=[ModeloGanado(
-                    especie=str(g['especie']),
-                    cantidad=int(g['cantidad'])
+                    idGanado=str(g['idGanado']),
                 ) for g in alquiler['usuario']['ganado']]
             ),
             "terreno": ModeloTerreno(
                 idTerreno=str(alquiler['terreno']['idTerreno']),
                 precio=float(alquiler['terreno']['precio'])      
             ),
-            "periodo": ModeloPeriodo(
-                fechaInicio=str(alquiler['periodo']['fechaInicio']),
-                fechaFin=str(alquiler['periodo']['fechaFin'])
-            ),
-            "pagoTotal": float(alquiler["pagoTotal"])
+            "periodo": ModeloPeriodo.from_bson(alquiler['periodo']),
+            "tipoPago": str(alquiler["tipoPago"]),
+            "estadoTransaccion": str(alquiler["estadoTransaccion"]),
+            "entidad": str(alquiler["entidad"]),
+            "precioTotal": float(alquiler["precioTotal"]),
+            "calificacion": alquiler.get("calificacion", None)  # Optional
         }

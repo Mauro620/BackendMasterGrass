@@ -69,33 +69,42 @@ class InfraestructuraAlquiler:
             # Insertar los datos usando la estructura de tu ModeloAlquiler
             result = col.insert_one(
                 {
-                    "IdAlquiler": modelo_Alquiler.idAlquiler,
-                    "nombreAlquiler": modelo_Alquiler.nombreAlquiler,
-                    "email": modelo_Alquiler.email,
-                    "telefono": modelo_Alquiler.telefono,
-                    "ubicacion": {
-                        "Pais": modelo_Alquiler.ubicacion.Pais,
-                        "Departamento": modelo_Alquiler.ubicacion.Pais,
-                        "Pais": modelo_Alquiler.ubicacion.Pais,
-                        "Pais": modelo_Alquiler.ubicacion.Pais,
+                    "idAlquiler": modelo_Alquiler.idAlquiler,
+                    "usuario": {
+                        "idUsuario": modelo_Alquiler.usuario.idUsuario,
+                        "nombreUsuario": modelo_Alquiler.usuario.nombreUsuario,
+                        "email": modelo_Alquiler.usuario.email,
+                        "telefono": modelo_Alquiler.usuario.telefono,
+                        "ganado": [
+                            {
+                                "idGanado": g.idGanado
+                            } for g in modelo_Alquiler.usuario.ganado
+                        ]
                     },
-                    "tipoAlquiler": modelo_Alquiler.tipoAlquiler,
-                    "historialAlquileres": {
-                        "idAlquiler": modelo_Alquiler.historialAlquileres.idAlquiler,
-                        "idAlquiler": modelo_Alquiler.historialAlquileres.idAlquiler,
-                        "fechaInicio": modelo_Alquiler.historialAlquileres.fechaInicio,
-                        "fechaFin": modelo_Alquiler.historialAlquileres.fechaFin
-                    }
+                    "terreno": {
+                        "idTerreno": modelo_Alquiler.terreno.idTerreno,
+                        "precio": modelo_Alquiler.terreno.precio
+                    },
+                    "periodo": {
+                        "fechaInicio": modelo_Alquiler.periodo.fechaInicio,
+                        "fechaFin": modelo_Alquiler.periodo.fechaFin
+                    },
+                    "tipoPago": modelo_Alquiler.tipoPago,
+                    "estadoTransaccion": modelo_Alquiler.estadoTransaccion,
+                    "entidad": modelo_Alquiler.entidad,
+                    "precioTotal": modelo_Alquiler.precioTotal,
+                    "calificacion": modelo_Alquiler.calificacion
                 }
             )
-            
+
             resultado = f"Ingresar Alquiler Exitoso: {result.acknowledged}, ID insertado: {result.inserted_id}"
         except Exception as ex:
             resultado = f"Ingresar Alquiler Fallido: {ex}"
         finally:
             client.close()
-        
+
         return resultado
+
     #---------------------------------------------
     def modificar_alquiler(self, id:str, modelo_Alquiler: ModeloAlquiler):
         resultado = []
@@ -113,26 +122,31 @@ class InfraestructuraAlquiler:
                 {
                     "$set":
                     {
-                    "IdAlquiler": modelo_Alquiler.IdAlquiler,
-                    "nombreAlquiler": modelo_Alquiler.nombreAlquiler,
-                    "email": modelo_Alquiler.email,
-                    "telefono": modelo_Alquiler.telefono,
-                    "ganado": {
-                        "especie": modelo_Alquiler.ganado.especie,
-                        "cantidad": modelo_Alquiler.ganado.cantidad,
-                        "detalle": {
-                            "idGanado": modelo_Alquiler.ganado.detalle.idGanado,
-                            "raza": modelo_Alquiler.ganado.detalle.raza,
-                            "estadoSalud": modelo_Alquiler.ganado.detalle.estadoSalud
-                        }
+                    "idAlquiler": modelo_Alquiler.idAlquiler,
+                    "usuario": {
+                        "idUsuario": modelo_Alquiler.usuario.idUsuario,
+                        "nombreUsuario": modelo_Alquiler.usuario.nombreUsuario,
+                        "email": modelo_Alquiler.usuario.email,
+                        "telefono": modelo_Alquiler.usuario.telefono,
+                        "ganado": [
+                            {
+                                "idGanado": g.idGanado
+                            } for g in modelo_Alquiler.usuario.ganado
+                        ]
                     },
-                    "tipoAlquiler": modelo_Alquiler.tipoAlquiler,
-                    "historialAlquileres": {
-                        "idAlquiler": modelo_Alquiler.historialAlquileres.idAlquiler,
-                        "idAlquiler": modelo_Alquiler.historialAlquileres.idAlquiler,
-                        "fechaInicio": modelo_Alquiler.historialAlquileres.fechaInicio,
-                        "fechaFin": modelo_Alquiler.historialAlquileres.fechaFin
-                    }
+                    "terreno": {
+                        "idTerreno": modelo_Alquiler.terreno.idTerreno,
+                        "precio": modelo_Alquiler.terreno.precio
+                    },
+                    "periodo": {
+                        "fechaInicio": modelo_Alquiler.periodo.fechaInicio,
+                        "fechaFin": modelo_Alquiler.periodo.fechaFin
+                    },
+                    "tipoPago": modelo_Alquiler.tipoPago,
+                    "estadoTransaccion": modelo_Alquiler.estadoTransaccion,
+                    "entidad": modelo_Alquiler.entidad,
+                    "precioTotal": modelo_Alquiler.precioTotal,
+                    "calificacion": modelo_Alquiler.calificacion
                 }
                 })
             resultado = f"Modificar Alquiler Exitoso: {result.acknowledged, result.modified_count}"

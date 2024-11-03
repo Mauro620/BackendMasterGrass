@@ -64,40 +64,30 @@ class InfraestructuraTerreno:
             db = client[database_name]
             col = db[collection_name]
             
-            # Preparar el historial de alquileres si existe
-            historial_alquileres = []
-            if modelo_terreno.historialAlquileres:
-                for alquiler in modelo_terreno.historialAlquileres:
-                    historial_alquileres.append({
-                        "idAlquiler": alquiler.idAlquiler,
-                        "usuario": {
-                            "idUsuario": alquiler.usuario.idUsuario,
-                            "nombreUsuario": alquiler.usuario.nombreUsuario
-                        },
-                        "periodo": {
-                            "fechaInicio": alquiler.periodo.fechaInicio,
-                            "fechaFin": alquiler.periodo.fechaFin
+            nuevo_terreno={
+                "idTerreno": modelo_terreno.idTerreno,
+                "ubicacion": {
+                    "pais": modelo_terreno.ubicacion.pais,
+                    "departamento": modelo_terreno.ubicacion.departamento,
+                    "ciudad": modelo_terreno.ubicacion.ciudad,
+                    "direccion": modelo_terreno.ubicacion.direccion
+                },
+                "tamano": modelo_terreno.tamano,
+                "tipoPasto": modelo_terreno.tipoPasto,
+                "precio": modelo_terreno.precio,
+                "historialAlquileres": [
+                    {
+                        "idAlquiler": historial.idAlquiler,
+                        "usuario":{
+                            "idUsuario": historial.usuario.idUsuario,
+                            "nombreUsuario": historial.usuario.nombreUsuario
                         }
-                    })
-            
-            # Insertar los datos usando la estructura de tu ModeloTerreno
-            result = col.insert_one(
-                {
-                    "idTerreno": modelo_terreno.idTerreno,
-                    "ubicacion": {
-                        "Pais": modelo_terreno.ubicacion.Pais,
-                        "Departamento": modelo_terreno.ubicacion.Departamento,
-                        "Ciudad": modelo_terreno.ubicacion.Ciudad,
-                        "Direccion": modelo_terreno.ubicacion.Direccion
-                    },
-                    "tamano": modelo_terreno.tamano,
-                    "tipoPasto": modelo_terreno.tipoPasto,
-                    "precio": modelo_terreno.precio,
-                    "estadoDelTerreno": modelo_terreno.estadoDelTerreno,
-                    "historialAlquileres": historial_alquileres  # Se asigna el array construido
-                }
-            )
-            resultado = f"Ingresar Terreno Exitoso: {result.acknowledged}"
+                    }for historial in modelo_terreno.historialAlquileres
+                ]
+
+            }
+            result = col.insert_one(nuevo_terreno)
+            resultado = [f"Ingresar Terreno Exitoso: {result.acknowledged}"]
         except Exception as ex:
             resultado = f"Ingresar Terreno Fallido: {ex}"
         finally:
@@ -118,23 +108,6 @@ class InfraestructuraTerreno:
             db = client[database_name]
             col = db[collection_name]
 
-            # Preparar el historial de alquileres si existe
-            historial_alquileres = []
-            if modelo_terreno.historialAlquileres:
-                for alquiler in modelo_terreno.historialAlquileres:
-                    historial_alquileres.append({
-                        "idAlquiler": alquiler.idAlquiler,
-                        "usuario": {
-                            "idUsuario": alquiler.usuario.idUsuario,
-                            "nombreUsuario": alquiler.usuario.nombreUsuario
-                        },
-                        "periodo": {
-                            "fechaInicio": alquiler.periodo.fechaInicio,
-                            "fechaFin": alquiler.periodo.fechaFin
-                        }
-                    })
-
-            # Realizar la actualización
             result = col.update_one(
                 {
                     "_id": ObjectId(id)
@@ -143,16 +116,24 @@ class InfraestructuraTerreno:
                     "$set": {
                         "idTerreno": modelo_terreno.idTerreno,
                         "ubicacion": {
-                            "Pais": modelo_terreno.ubicacion.Pais,
-                            "Departamento": modelo_terreno.ubicacion.Departamento,
-                            "Ciudad": modelo_terreno.ubicacion.Ciudad,
-                            "Direccion": modelo_terreno.ubicacion.Direccion
+                            "pais": modelo_terreno.ubicacion.pais,
+                            "departamento": modelo_terreno.ubicacion.departamento,
+                            "ciudad": modelo_terreno.ubicacion.ciudad,
+                            "direccion": modelo_terreno.ubicacion.direccion
                         },
                         "tamano": modelo_terreno.tamano,
                         "tipoPasto": modelo_terreno.tipoPasto,
                         "precio": modelo_terreno.precio,
-                        "estadoDelTerreno": modelo_terreno.estadoDelTerreno,
-                        "historialAlquileres": historial_alquileres  # Se asigna el array construido
+                        "historialAlquileres": [
+                            {
+                                "idAlquiler": historial.idAlquiler,
+                                "usuario":{
+                                    "idUsuario": historial.usuario.idUsuario,
+                                    "nombreUsuario": historial.usuario.nombreUsuario
+                                }
+                            }for historial in modelo_terreno.historialAlquileres
+                        ]
+
                     }
                 }
             )
@@ -164,8 +145,6 @@ class InfraestructuraTerreno:
             client.close()
 
         return resultado
-
-
 
     def eliminar_terreno(self, id:str):
         resultado = []
@@ -180,9 +159,9 @@ class InfraestructuraTerreno:
                 {
                     "_id": ObjectId(id)
                 })
-            resultado = f"Eliminar Terreno Exitoso: {result.acknowledged, result.deleted_count}"
+            resultado = [f"Eliminar Terreno Exitoso: {result.acknowledged, result.deleted_count}"]
         except Exception as ex:
-            resultado = f"Eliminar Terreno Fallido: {ex}"
+            resultado = [f"Eliminar Terreno Fallido: {ex}"]
         finally:
             client.close()
         return resultado

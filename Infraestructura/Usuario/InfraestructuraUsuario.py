@@ -77,19 +77,19 @@ class InfraestructuraUsuario:
                         "raza": g.raza,
                         "cantidad": g.cantidad,
                         "registrarCuidadoEspecial": [
-                            {
-                                "individuos": [
-                                    {"serieIndividuo": cu.individuo}
-                                    for cu in g.registrarCuidadoEspecial
-                                ],
-                                "tituloCaso": g.registrarCuidadoEspecial[0].tituloCaso,
-                                "descripcion": g.registrarCuidadoEspecial[0].descripcion
+                        {
+                            "individuos": [
+                                        {"serieIndividuo": ind.serieIndividuo}  # Extraer el valor del objeto ModeloIndividuo
+                                        for ind in cu.individuos  # Recorre la lista de individuos en cada cuidado especial
+                                        ],
+                                        "tituloCaso": cu.tituloCaso,
+                                        "descripcion": cu.descripcion
+                                    }
+                                    for cu in g.registrarCuidadoEspecial  # Recorre los cuidados especiales
+                                ]
                             }
                             for g in modelo_usuario.ganado
-                        ]
-                    }
-                    for g in modelo_usuario.ganado
-                ],
+                        ],
                 "terreno": [
                     {"idTerreno": t.idTerreno} for t in modelo_usuario.terreno
                 ],
@@ -132,27 +132,43 @@ class InfraestructuraUsuario:
                 {
                     "$set":
                     {
-                    "IdUsuario": modelo_usuario.IdUsuario,
+                    "idUsuario": modelo_usuario.IdUsuario,
                     "nombreUsuario": modelo_usuario.nombreUsuario,
                     "email": modelo_usuario.email,
                     "telefono": modelo_usuario.telefono,
-                    "ganado": {
-                        "especie": modelo_usuario.ganado.especie,
-                        "cantidad": modelo_usuario.ganado.cantidad,
-                        "detalle": {
-                            "idGanado": modelo_usuario.ganado.detalle.idGanado,
-                            "raza": modelo_usuario.ganado.detalle.raza,
-                            "estadoSalud": modelo_usuario.ganado.detalle.estadoSalud
+                    "ganado": [
+                        {
+                            "idGanado": g.idGanado,
+                            "especie": g.especie,
+                            "raza": g.raza,
+                            "cantidad": g.cantidad,
+                            "registrarCuidadoEspecial": [
+                            {
+                                "individuos": [
+                                            {"serieIndividuo": ind.serieIndividuo}  # Extraer el valor del objeto ModeloIndividuo
+                                            for ind in cu.individuos  # Recorre la lista de individuos en cada cuidado especial
+                                            ],
+                                            "tituloCaso": cu.tituloCaso,
+                                            "descripcion": cu.descripcion
+                                        }
+                                        for cu in g.registrarCuidadoEspecial  # Recorre los cuidados especiales
+                                    ]
+                                }
+                                for g in modelo_usuario.ganado
+                            ],
+                    "terreno": [
+                        {"idTerreno": t.idTerreno} for t in modelo_usuario.terreno
+                    ],
+                    "historialAlquileres": [
+                        {
+                            "idAlquiler": al.idAlquiler,
+                            "idTerreno": al.idTerreno,
+                            "fechaInicio": al.fechaInicio,
+                            "fechaFin": al.fechaFin
                         }
-                    },
-                    "tipoUsuario": modelo_usuario.tipoUsuario,
-                    "historialAlquileres": {
-                        "idAlquiler": modelo_usuario.historialAlquileres.idAlquiler,
-                        "idTerreno": modelo_usuario.historialAlquileres.idTerreno,
-                        "fechaInicio": modelo_usuario.historialAlquileres.fechaInicio,
-                        "fechaFin": modelo_usuario.historialAlquileres.fechaFin
-                    }
-                }
+                        for al in modelo_usuario.historialAlquileres
+                    ]
+                }       
                 })
             resultado = f"Modificar Usuario Exitoso: {result.acknowledged, result.modified_count}"
         except Exception as ex:

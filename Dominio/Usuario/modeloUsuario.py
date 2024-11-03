@@ -3,7 +3,6 @@ from bson import ObjectId
 from datetime import datetime
 from typing import List
 
-
 class ModeloIndividuo(BaseModel):
     serieIndividuo: int
 
@@ -11,7 +10,7 @@ class ModeloTerreno(BaseModel):
     idTerreno: str
 
 class ModeloCuidados(BaseModel):
-    individuo: ModeloIndividuo
+    individuos: list[ModeloIndividuo] 
     tituloCaso: str
     descripcion: str
 
@@ -37,7 +36,7 @@ class ModeloUsuario(BaseModel):
     telefono: str
     ganado: list[ModeloGanado]
     terreno: list[ModeloTerreno]
-    historialAlquileres: list[ModeloHistorialAlquiler]  # Ahora es una lista de historial de alquileres
+    historialAlquileres: list[ModeloHistorialAlquiler]
 
     @staticmethod
     def usuario_helper(usuario):
@@ -49,18 +48,15 @@ class ModeloUsuario(BaseModel):
                 cantidad=g['cantidad'],
                 registrarCuidadoEspecial=[
                     ModeloCuidados(
-                        individuo=ModeloIndividuo(serieIndividuo=int(ind['serieIndividuo'])),
+                        individuos=[
+                            ModeloIndividuo(serieIndividuo=int(ind['serieIndividuo'])) for ind in c.get('individuos', [])
+                        ],
                         tituloCaso=str(c['tituloCaso']),
                         descripcion=str(c['descripcion'])
                     ) for c in g.get('registrarCuidadoEspecial', [])
-                    for ind in c.get('individuos', [])
                 ]
             ) for g in usuario.get('ganado', [])
         ]
-
-        # Convierte las fechas de string a datetime
-        # fecha_inicio = datetime(usuario['historialAlquileres'][0]['fechaInicio'], '%Y-%m-%dT%H:%M:%S.%fZ') if 'historialAlquileres' in usuario and usuario['historialAlquileres'] else None
-        # fecha_fin = datetime(usuario['historialAlquileres'][0]['fechaFin'], '%Y-%m-%dT%H:%M:%S.%fZ') if 'historialAlquileres' in usuario and usuario['historialAlquileres'] else None
 
         return {
             "_id": str(usuario['_id']),
@@ -76,10 +72,8 @@ class ModeloUsuario(BaseModel):
                 ModeloHistorialAlquiler(
                     idAlquiler=str(alquiler['idAlquiler']),
                     idTerreno=str(alquiler['idTerreno']),
-                    fechaInicio=datetime(alquiler['fechaInicio'], '%Y-%m-%dT%H:%M:%S.%fZ') if isinstance(alquiler['fechaInicio'], str) else alquiler['fechaInicio'],
-                    fechaFin=datetime(alquiler['fechaFin'], '%Y-%m-%dT%H:%M:%S.%fZ') if isinstance(alquiler['fechaFin'], str) else alquiler['fechaFin']
+                    fechaInicio=datetime.fromisoformat(alquiler['fechaInicio']) if isinstance(alquiler['fechaInicio'], str) else alquiler['fechaInicio'],
+                    fechaFin=datetime.fromisoformat(alquiler['fechaFin']) if isinstance(alquiler['fechaFin'], str) else alquiler['fechaFin']
                 ) for alquiler in usuario.get('historialAlquileres', [])
             ]
         }
-
-

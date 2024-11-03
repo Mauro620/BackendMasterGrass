@@ -19,6 +19,15 @@ app = APIRouter() #Definir urls para incluir en el main
 async def consultarTodosLosTerrenos():
     infraestructuraTerreno = InfraestructuraTerreno() 
     return infraestructuraTerreno.consultar_terreno_todo()
+# ------------------ Consultar terreno en especifico -------------------------
+@app.get(
+    "/consultar_terreno_id",
+    response_model= list,
+    tags=["Terreno"]
+)
+async def consultarTerrenoId(id:str):
+    infraestructuraTerreno = InfraestructuraTerreno()
+    return infraestructuraTerreno.consultar_terreno_id(id)
 
 # ------------------ Ingresar un nuevo terreno -------------------------
 @app.post(
@@ -30,22 +39,12 @@ async def ingresarTerreno(modeloTerreno : ModeloTerreno):
     infraestructuraTerreno = InfraestructuraTerreno()
     return infraestructuraTerreno.ingresar_terreno(modeloTerreno)
 
-# ------------------ Consultar terreno en especifico -------------------------
-@app.get(
-    "/consultar_terreno_id",
-    response_model= list,
-    tags=["Terreno"]
-)
-async def consultarTerrenoId(id:str):
-    infraestructuraTerreno = InfraestructuraTerreno()
-    return infraestructuraTerreno.consultar_terreno_id(id)
-
 # ------------------ Modificar un terreno seleccionado -------------------------
 @app.put(
     "/modificar_terreno",
     tags=["Terreno"]
 )
-async def modificarTerreno(id:str, modeloTerreno = ModeloTerreno):
+async def modificarTerreno(id:str, modeloTerreno : ModeloTerreno ):
     infraestructuraTerreno = InfraestructuraTerreno()
     return infraestructuraTerreno.modificar_terreno(id, modeloTerreno)
 
@@ -57,4 +56,4 @@ async def modificarTerreno(id:str, modeloTerreno = ModeloTerreno):
 )
 async def eliminarTerreno(id:str):
     infraestructuraTerreno = InfraestructuraTerreno()
-    return infraestructuraTerreno.retirar_terreno(id)
+    return infraestructuraTerreno.eliminar_terreno(id)

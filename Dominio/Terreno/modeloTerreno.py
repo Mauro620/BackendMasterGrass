@@ -55,23 +55,27 @@ class ModeloTerreno(BaseModel):
         
         for alquiler in terreno.get('historialAlquileres', []):
             try:
-                periodo = alquiler['periodo']
+                # Validar que 'periodo' es un diccionario antes de intentar procesarlo
+                periodo = alquiler.get('periodo', None)
+                if not isinstance(periodo, dict):
+                    raise ValueError(f"Periodo no es un diccionario válido: {periodo}")
                 
-                # Validar que el periodo es un diccionario antes de pasarlo al modelo
-                if isinstance(periodo, dict):
-                    historial_alquileres.append(
-                        ModeloHistorialAlquileres(
-                            idAlquiler=alquiler['idAlquiler'],
-                            usuario=ModeloUsuario(
-                                idUsuario=alquiler['usuario']['idUsuario'],
-                                nombreUsuario=alquiler['usuario']['nombreUsuario']
-                            ),
-                            periodo=ModeloPeriodo.from_bson(periodo)
-                        )
+                # Procesar el alquiler y su periodo
+                historial_alquileres.append(
+                    ModeloHistorialAlquileres(
+                        idAlquiler=alquiler['idAlquiler'],
+                        usuario=ModeloUsuario(
+                            idUsuario=alquiler['usuario']['idUsuario'],
+                            nombreUsuario=alquiler['usuario']['nombreUsuario']
+                        ),
+                        periodo=ModeloPeriodo.from_bson(periodo)  # Convertir el periodo
                     )
+                )
             except Exception as e:
-                print(f"Error procesando historial de alquileres: {e}")
+                # Imprimir mensaje de error más detallado
+                print(f"Error procesando historial de alquileres para alquiler {alquiler.get('idAlquiler')}: {e}")
 
+        # Retornar el terreno con los alquileres procesados
         return {
             "_id": str(terreno['_id']),
             "idTerreno": str(terreno['idTerreno']),
@@ -84,5 +88,6 @@ class ModeloTerreno(BaseModel):
             "tamano": terreno['tamano'],
             "tipoPasto": terreno['tipoPasto'],
             "precio": terreno['precio'],
-            "historialAlquileres": historial_alquileres
+            "historialAlquileres": historial_alquileres  # Asegurarse de devolver los alquileres procesados
         }
+

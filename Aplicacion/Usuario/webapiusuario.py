@@ -24,6 +24,17 @@ app = APIRouter()
 async def consultar_usuario_todo():
     infraestructuraUsuario = InfraestructuraUsuario()
     return infraestructuraUsuario.consultar_usuario_todo()
+# ---------------------- Consultar todos los usuarios ---------------------------
+@app.get(
+    "/verificar_usuario",
+    response_model=list,
+    summary="Consultar Usuario Todo",
+    description="Consultar Usuario Todo",
+    tags=["Usuario"]
+)
+async def verificar_usuario(email: str, contrasena:str):
+    infraestructuraUsuario = InfraestructuraUsuario()
+    return infraestructuraUsuario.verificar_usuario(email, contrasena)
 
 # ------------------ Consultar usuario en especifico -------------------------
 

@@ -3,6 +3,7 @@ from bson import ObjectId
 import pymongo
 from pymongo import MongoClient
 from typing import List
+import bcrypt
 
 #------------------ Usuario ------------------#
 class InfraestructuraUsuario:
@@ -63,12 +64,17 @@ class InfraestructuraUsuario:
         try:
             db = client[database_name]
             col = db[collection_name]
+
+            # Hashear la contraseña usando bcrypt
+            hashed_password = bcrypt.hashpw(modelo_usuario.contrasena.encode('utf-8'), bcrypt.gensalt())
+
             
             # Preparar la estructura para insertar
             nuevo_usuario = {
                 "idUsuario": modelo_usuario.IdUsuario,
                 "nombreUsuario": modelo_usuario.nombreUsuario,
                 "email": modelo_usuario.email,
+                "contrasena": hashed_password.decode('utf-8'),
                 "telefono": modelo_usuario.telefono,
                 "ganado": [
                     {
@@ -135,6 +141,7 @@ class InfraestructuraUsuario:
                     "idUsuario": modelo_usuario.IdUsuario,
                     "nombreUsuario": modelo_usuario.nombreUsuario,
                     "email": modelo_usuario.email,
+                    "contrasena": modelo_usuario.contrasena,
                     "telefono": modelo_usuario.telefono,
                     "ganado": [
                         {
@@ -195,4 +202,34 @@ class InfraestructuraUsuario:
             resultado = f"Eliminar Usuario Fallido: {ex}"
         finally:
             client.close()
+        return resultado
+    
+    # -------------------- Verificar Usuario ----------------------------
+    def verificar_usuario(self, email: str, contrasena: str):
+        resultado = []
+        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
+        database_name = "MasterGrass"
+        collection_name = "Usuario"
+        client = pymongo.MongoClient(connection_string)
+
+        try:
+            db = client[database_name]
+            col = db[collection_name]
+
+            # Buscar el usuario por email
+            result = col.find_one({"email": email})
+
+            if result:
+                # Verificar la contraseña usando bcrypt
+                if bcrypt.checkpw(contrasena.encode('utf-8'), result['contrasena'].encode('utf-8')):
+                    resultado = [f"Usuario verificado correctamente: {result['nombreUsuario']}"]
+                else:
+                    resultado = ["Contraseña incorrecta"]
+            else:
+                resultado = "Usuario no encontrado"
+        except Exception as ex:
+            resultado = [f"Verificación de usuario fallida: {ex}"]
+        finally:
+            client.close()
+
         return resultado

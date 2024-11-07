@@ -32,7 +32,7 @@ class ModeloUsuario(BaseModel):
     IdUsuario: str
     nombreUsuario: str
     email: str
-    contraseña: str
+    contrasena: str
     telefono: str
     ganado: list[ModeloGanado]
     terreno: list[ModeloTerreno]
@@ -63,6 +63,7 @@ class ModeloUsuario(BaseModel):
             "idUsuario": str(usuario.get('idUsuario', '')),
             "nombreUsuario": str(usuario['nombreUsuario']),
             "email": str(usuario['email']),
+            "contrasena": str(usuario['contrasena']),
             "telefono": str(usuario['telefono']),
             "ganado": ganado,
             "terreno": [

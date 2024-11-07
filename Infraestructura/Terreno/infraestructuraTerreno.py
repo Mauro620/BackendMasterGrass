@@ -83,6 +83,9 @@ class InfraestructuraTerreno:
                             "nombreUsuario": historial.usuario.nombreUsuario
                         }
                     }for historial in modelo_terreno.historialAlquileres
+                ],
+                "imagenes": [
+                    modelo_terreno.imagenes
                 ]
 
             }
@@ -132,8 +135,10 @@ class InfraestructuraTerreno:
                                     "nombreUsuario": historial.usuario.nombreUsuario
                                 }
                             }for historial in modelo_terreno.historialAlquileres
+                        ],
+                        "imagenes": [
+                            modelo_terreno.imagenes
                         ]
-
                     }
                 }
             )

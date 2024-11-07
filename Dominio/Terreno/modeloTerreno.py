@@ -48,11 +48,13 @@ class ModeloTerreno(BaseModel):
     tipoPasto: str
     precio: float
     historialAlquileres: List[ModeloHistorialAlquileres]
+    imagenes: List[str] = []  # Lista de URLs de las imágenes asociadas al terreno
 
     @staticmethod
     def terreno_helper(terreno):
         historial_alquileres = []
-        
+
+
         for alquiler in terreno.get('historialAlquileres', []):
             try:
                 # Validar que 'periodo' es un diccionario antes de intentar procesarlo
@@ -88,6 +90,7 @@ class ModeloTerreno(BaseModel):
             "tamano": terreno['tamano'],
             "tipoPasto": terreno['tipoPasto'],
             "precio": terreno['precio'],
-            "historialAlquileres": historial_alquileres  # Asegurarse de devolver los alquileres procesados
+            "historialAlquileres": historial_alquileres,  # Asegurarse de devolver los alquileres procesados
+            "imagenesTerreno": terreno.get('imagenes', [])
         }
 

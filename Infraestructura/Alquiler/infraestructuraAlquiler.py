@@ -2,24 +2,21 @@ from Dominio.Alquiler.modeloAlquiler import ModeloAlquiler
 from bson import ObjectId
 import pymongo
 from pymongo import MongoClient
+import os
 
 #------------------ Alquiler ------------------#
 class InfraestructuraAlquiler:
 
     def __init__(self) -> None:
-        pass
+        self.client = pymongo.MongoClient(os.getenv("connection_string"))
+        self.db = self.client[os.getenv("database_name")]
+        self.col = self.db["Alquiler"]
 
     #-----------------------------------------    
     def consultar_alquiler_todo(self):
         results = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Alquiler"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.find()
+            result = self.col.find()
             
             for item in list(result):
                 results.append(ModeloAlquiler.alquiler_helper(item))
@@ -27,20 +24,14 @@ class InfraestructuraAlquiler:
         except Exception as ex:
             print(f"Consultar Alquiler Todo Fallido: {ex}")
         finally:
-            client.close()
+            self.client.close()
         return results
 
 #-------------------------------------------------------------------
     def consultar_alquiler_id(self, id:str):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Alquiler"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.find(
+            result = self.col.find(
                 {
                     "idAlquiler": id
                 })
@@ -50,24 +41,16 @@ class InfraestructuraAlquiler:
         except Exception as ex:
             resultado = f"Consultar Alquiler Id Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
         return resultado
     
 
     # --------------------------------------------------------------------------------
     def ingresar_alquiler(self, modelo_Alquiler: ModeloAlquiler):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Alquiler"
-        client = pymongo.MongoClient(connection_string)
-        
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            
             # Insertar los datos usando la estructura de tu ModeloAlquiler
-            result = col.insert_one(
+            result = self.col.insert_one(
                 {
                     "idAlquiler": modelo_Alquiler.idAlquiler,
                     "usuario": {
@@ -101,21 +84,15 @@ class InfraestructuraAlquiler:
         except Exception as ex:
             resultado = f"Ingresar Alquiler Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
 
         return resultado
 
     #---------------------------------------------
     def modificar_alquiler(self, id:str, modelo_Alquiler: ModeloAlquiler):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Alquiler"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.update_many(
+            result = self.col.update_many(
                 {
                     "_id": ObjectId(id)
                 },
@@ -153,19 +130,13 @@ class InfraestructuraAlquiler:
         except Exception as ex:
             resultado = f"Modificar Alquiler Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
         return resultado
 
     def eliminar_alquiler(self, id:str):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Alquiler"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.delete_one(
+            result = self.col.delete_one(
                 {
                     "_id": ObjectId(id)
                 })
@@ -173,5 +144,5 @@ class InfraestructuraAlquiler:
         except Exception as ex:
             resultado = f"Eliminar Alquiler Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
         return resultado

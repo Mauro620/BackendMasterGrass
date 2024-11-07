@@ -1,23 +1,20 @@
 from Dominio.Terreno.modeloTerreno import ModeloTerreno
 from bson import ObjectId
 import pymongo
+import os
 
 #------------------ Terreno ------------------#
 class InfraestructuraTerreno:
 
     def __init__(self) -> None:
-        pass
+        self.client = pymongo.MongoClient(os.getenv("connection_string"))
+        self.db = self.client[os.getenv("database_name")]
+        self.col = self.db["Terreno"]
         
     def consultar_terreno_todo(self):
         results = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Terreno"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.find()
+            result = self.col.find()
             
             for item in list(result):
                 results.append(ModeloTerreno.terreno_helper(item))
@@ -25,20 +22,14 @@ class InfraestructuraTerreno:
         except Exception as ex:
             print(f"Consultar Terreno Todo Fallido: {ex}")
         finally:
-            client.close()
+            self.client.close()
         return results
 
 #-------------------------------------------------------------------
     def consultar_terreno_id(self, id:str):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Terreno"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.find(
+            result = self.col.find(
                 {
                     "_id": ObjectId(id)
                 })
@@ -48,22 +39,14 @@ class InfraestructuraTerreno:
         except Exception as ex:
             resultado = f"Consultar Terreno Id Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
         return resultado
     
 
     # --------------------------------------------------------------------------------
     def ingresar_terreno(self, modelo_terreno: ModeloTerreno):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Terreno"
-        client = pymongo.MongoClient(connection_string)
-
-        try:
-            db = client[database_name]
-            col = db[collection_name]
-            
+        try:            
             nuevo_terreno={
                 "idTerreno": modelo_terreno.idTerreno,
                 "ubicacion": {
@@ -89,12 +72,12 @@ class InfraestructuraTerreno:
                 ]
 
             }
-            result = col.insert_one(nuevo_terreno)
+            result = self.col.insert_one(nuevo_terreno)
             resultado = [f"Ingresar Terreno Exitoso: {result.acknowledged}"]
         except Exception as ex:
             resultado = f"Ingresar Terreno Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
         
         return resultado
 
@@ -102,16 +85,8 @@ class InfraestructuraTerreno:
     #---------------------------------------------
     def modificar_terreno(self, id: str, modelo_terreno: ModeloTerreno):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Terreno"
-        client = pymongo.MongoClient(connection_string)
-
         try:
-            db = client[database_name]
-            col = db[collection_name]
-
-            result = col.update_one(
+            result = self.col.update_one(
                 {
                     "_id": ObjectId(id)
                 },
@@ -147,20 +122,14 @@ class InfraestructuraTerreno:
         except Exception as ex:
             resultado = f"Modificar Terreno Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
 
         return resultado
 
     def eliminar_terreno(self, id:str):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Terreno"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.delete_one(
+            result = self.col.delete_one(
                 {
                     "_id": ObjectId(id)
                 })
@@ -168,5 +137,5 @@ class InfraestructuraTerreno:
         except Exception as ex:
             resultado = [f"Eliminar Terreno Fallido: {ex}"]
         finally:
-            client.close()
+            self.client.close()
         return resultado

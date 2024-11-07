@@ -4,44 +4,34 @@ import pymongo
 from pymongo import MongoClient
 from typing import List
 import bcrypt
+import os
 
 #------------------ Usuario ------------------#
 class InfraestructuraUsuario:
 
     def __init__(self) -> None:
-        pass
+        self.client = pymongo.MongoClient(os.getenv("connection_string"))
+        self.db = self.client[os.getenv("database_name")]
+        self.col = self.db["Usuario"]
 
     #-------------------------------------------    
     def consultar_usuario_todo(self):
         results = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Usuario"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.find()
-            
+            result = self.col.find()
             for item in list(result):
                 results.append(ModeloUsuario.usuario_helper(item))
         
         except Exception as ex:
             print(f"Consultar Usuario Todo Fallido: {ex}")
         finally:
-            client.close()
+            self.client.close()
         return results
     #-------------------------------------------------------------------
     def consultar_usuario_id(self, id:str):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Usuario"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.find(
+            result = self.col.find(
                 {
                     "idUsuario": id
                 })
@@ -51,20 +41,12 @@ class InfraestructuraUsuario:
         except Exception as ex:
             resultado = f"Consultar Usuario Id Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
         return resultado
     # --------------------------------------------------------------------------------
     def ingresar_usuario(self, modelo_usuario: ModeloUsuario):
-        resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Usuario"
-        client = pymongo.MongoClient(connection_string)
-        
+        resultado = []        
         try:
-            db = client[database_name]
-            col = db[collection_name]
-
             # Hashear la contraseña usando bcrypt
             hashed_password = bcrypt.hashpw(modelo_usuario.contrasena.encode('utf-8'), bcrypt.gensalt())
 
@@ -111,27 +93,21 @@ class InfraestructuraUsuario:
             }
             
             # Insertar el nuevo usuario en la colección
-            result = col.insert_one(nuevo_usuario)
+            result = self.col.insert_one(nuevo_usuario)
             
             resultado = f"Ingresar Usuario Exitoso: {result.acknowledged}, ID insertado: {result.inserted_id}, tipo de objeto: {type(result)}"
         except Exception as ex:
             resultado = f"Ingresar Usuario Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
         
         return resultado
 
     #---------------------------------------------
     def modificar_usuario(self, id:str, modelo_usuario: ModeloUsuario):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Usuario"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.update_many(
+            result = self.col.update_many(
                 {
                     "_id": ObjectId(id)
                 },
@@ -181,19 +157,13 @@ class InfraestructuraUsuario:
         except Exception as ex:
             resultado = f"Modificar Usuario Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
         return resultado
 
     def eliminar_usuario(self, id:str):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Usuario"
-        client = pymongo.MongoClient(connection_string)
         try:
-            db = client[database_name]
-            col = db[collection_name]
-            result = col.delete_one(
+            result = self.col.delete_one(
                 {
                     "_id": ObjectId(id)
                 })
@@ -201,23 +171,15 @@ class InfraestructuraUsuario:
         except Exception as ex:
             resultado = f"Eliminar Usuario Fallido: {ex}"
         finally:
-            client.close()
+            self.client.close()
         return resultado
     
     # -------------------- Verificar Usuario ----------------------------
     def verificar_usuario(self, email: str, contrasena: str):
         resultado = []
-        connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-        database_name = "MasterGrass"
-        collection_name = "Usuario"
-        client = pymongo.MongoClient(connection_string)
-
         try:
-            db = client[database_name]
-            col = db[collection_name]
-
             # Buscar el usuario por email
-            result = col.find_one({"email": email})
+            result = self.col.find_one({"email": email})
 
             if result:
                 # Verificar la contraseña usando bcrypt
@@ -230,6 +192,6 @@ class InfraestructuraUsuario:
         except Exception as ex:
             resultado = [f"Verificación de usuario fallida: {ex}"]
         finally:
-            client.close()
+            self.client.close()
 
         return resultado

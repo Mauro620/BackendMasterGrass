@@ -19,13 +19,11 @@ load_dotenv()
 AZURE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 AZURE_CONTAINER_NAME = os.getenv("AZURE_CONTAINER_NAME")
 
-
-connection_string = "mongodb+srv://mcorreace:sywv6ZiKRwQGwOJi@cluster0.55ale.mongodb.net/MasterGrass?retryWrites=true&w=majority&appName=Cluster0"
-database_name = "MasterGrass"
+# Datos de conexión de mongo
 collection_name = "Terreno"
-client = pymongo.MongoClient(connection_string)
-db = client[database_name]
-col = db[collection_name]
+client = pymongo.MongoClient(os.getenv("connection_string"))
+db = client[os.getenv("database_name")]
+col = db["Terreno"]
 
 # Crear el cliente de Blob Storage
 blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
@@ -45,11 +43,9 @@ async def upload_image(file: UploadFile, terreno_id: str):
 
         # Generar la URL del archivo subido
         file_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{AZURE_CONTAINER_NAME}/{file_name}"
-
-
         # Actualizar el documento del terreno en MongoDB agregando la URL de la imagen
         result = col.update_one(
-            {"_id": ObjectId(terreno_id)},  # Buscar el terreno por su ID
+            {"_id": ObjectId(terreno_id)}, 
             {"$push": {"imagenes": file_url}}  # Agregar la nueva URL al array 'imagenes'
         )
 

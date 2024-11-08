@@ -37,6 +37,8 @@ class ModeloUsuario(BaseModel):
     ganado: list[ModeloGanado]
     terreno: list[ModeloTerreno]
     historialAlquileres: list[ModeloHistorialAlquiler]
+    rol: str
+    
 
     @staticmethod
     def usuario_helper(usuario):

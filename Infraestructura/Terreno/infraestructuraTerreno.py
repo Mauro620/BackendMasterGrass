@@ -67,10 +67,7 @@ class InfraestructuraTerreno:
                         }
                     }for historial in modelo_terreno.historialAlquileres
                 ],
-                "imagenes": [
-                    modelo_terreno.imagenes
-                ]
-
+                "imagenes": modelo_terreno.imagenes
             }
             result = self.col.insert_one(nuevo_terreno)
             resultado = [f"Ingresar Terreno Exitoso: {result.acknowledged}"]
@@ -86,6 +83,13 @@ class InfraestructuraTerreno:
     def modificar_terreno(self, id: str, modelo_terreno: ModeloTerreno):
         resultado = []
         try:
+            # Obtener el documento existente para preservar las imágenes antiguas
+            terreno_existente = self.col.find_one({"_id": ObjectId(id)})
+            imagenes_existentes = terreno_existente.get("imagenes")
+
+            # Si hay imágenes nuevas, las agregamos, si no, mantenemos las existentes
+            imagenes_actualizadas = modelo_terreno.imagenes if modelo_terreno.imagenes else imagenes_existentes
+
             result = self.col.update_one(
                 {
                     "_id": ObjectId(id)
@@ -105,15 +109,14 @@ class InfraestructuraTerreno:
                         "historialAlquileres": [
                             {
                                 "idAlquiler": historial.idAlquiler,
-                                "usuario":{
+                                "usuario": {
                                     "idUsuario": historial.usuario.idUsuario,
                                     "nombreUsuario": historial.usuario.nombreUsuario
                                 }
-                            }for historial in modelo_terreno.historialAlquileres
+                            } for historial in modelo_terreno.historialAlquileres
                         ],
-                        "imagenes": [
-                            modelo_terreno.imagenes
-                        ]
+                        # Mantener las imágenes anteriores si no se envían nuevas
+                        "imagenes": modelo_terreno.imagenes
                     }
                 }
             )
@@ -125,6 +128,7 @@ class InfraestructuraTerreno:
             self.client.close()
 
         return resultado
+
 
     def eliminar_terreno(self, id:str):
         resultado = []

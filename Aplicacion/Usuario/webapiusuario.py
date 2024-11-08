@@ -1,9 +1,15 @@
 # apiusuario:
 
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends, HTTPException
 
 from Dominio.Usuario.modeloUsuario import ModeloUsuario
 from Infraestructura.Usuario.infraestructuraUsuario import InfraestructuraUsuario
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jwt import PyJWTError, ExpiredSignatureError, decode
+
+from urllib.parse import unquote
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="usuario/login/")
 
 app: FastAPI = FastAPI(
     title="API Usuario",
@@ -12,6 +18,23 @@ app: FastAPI = FastAPI(
 
 app = APIRouter()
 ###################################
+
+def obtener_usuario_del_token(token: str = Depends(oauth2_scheme)):
+    try:
+        infraestructuraUsuario = InfraestructuraUsuario()
+        # Aquí el token ya es directamente el JWT, no es necesario el split
+        payload = decode(token, infraestructuraUsuario.SECRET_KEY, algorithms=[infraestructuraUsuario.ALGORITHM])
+        email = payload.get("sub")  # El "sub" es el idUsuario
+        
+        if email is None:
+            raise HTTPException(status_code=401, detail="Usuario no encontrado en el token")
+        
+        return email
+
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expirado")
+    except PyJWTError:
+        raise HTTPException(status_code=401, detail="Token inválido")
 
 # ---------------------- Consultar todos los usuarios ---------------------------
 @app.get(
@@ -40,15 +63,16 @@ async def verificar_usuario(email: str, contrasena:str):
 
 # Get
 @app.get(
-    "/consultar_usuario_id",
+    "/consultar_usuario_email",
     response_model=list,	
-    summary="Consultar Usuario Id",
-    description="Consultar Usuario Id",
+    summary="Consultar Usuario email",
+    description="Consultar Usuario email",
     tags=["Usuario"]
 )
-async def consultar_usuario_id(id:str):
+async def consultar_usuario_email(email:str):
+    email_decoded = unquote(email)
     infraestructuraUsuario = InfraestructuraUsuario()
-    return infraestructuraUsuario.consultar_usuario_id(id)
+    return infraestructuraUsuario.consultar_usuario_email(email_decoded)
 
 
 # ------------------ Ingresar usuario -------------------------
@@ -89,3 +113,35 @@ async def modificar_usuario(id:str, modelousuario: ModeloUsuario):
 async def eliminar_usuario(id:str):
     infraestructuraUsuario = InfraestructuraUsuario()
     return infraestructuraUsuario.eliminar_usuario(id)
+
+# ----------------------------------------------------------------
+@app.post(
+    "/login",
+    summary="creartoken",
+    description="Retirar Usuario",
+    tags=["Usuario"]
+
+)
+async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    infraestructuraUsuario = InfraestructuraUsuario()
+    
+    # Verificar las credenciales del usuario
+    usuario_valido = infraestructuraUsuario.verificar_usuario(form_data.username, form_data.password)
+    if usuario_valido[0] != "Usuario verificado correctamente":
+        raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos")
+    
+    # Crear el token
+    token = infraestructuraUsuario.crear_token({"email": form_data.username})  # Cambia según cómo se crea el token en tu infraestructura
+    return {"access_token": token, "token_type": "bearer"}
+
+# --------------------------------------------------------------------
+@app.get(
+    "/perfil",
+    summary="Obtener Perfil",
+    description="obtener Usuario",
+    tags=["Usuario"]
+)
+async def obtener_perfil(email: str = Depends(obtener_usuario_del_token)):
+    email_decoded = unquote(email)
+    usuario = InfraestructuraUsuario().consultar_usuario_email(email_decoded)
+    return usuario

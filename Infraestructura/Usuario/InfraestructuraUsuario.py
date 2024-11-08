@@ -1,10 +1,15 @@
 from Dominio.Usuario.modeloUsuario import ModeloUsuario
 from bson import ObjectId
 import pymongo
-from pymongo import MongoClient
 from typing import List
 import bcrypt
 import os
+from fastapi import HTTPException, Depends
+import jwt
+from datetime import datetime, timedelta
+from passlib.context import CryptContext
+
+
 
 #------------------ Usuario ------------------#
 class InfraestructuraUsuario:
@@ -13,6 +18,12 @@ class InfraestructuraUsuario:
         self.client = pymongo.MongoClient(os.getenv("connection_string"))
         self.db = self.client[os.getenv("database_name")]
         self.col = self.db["Usuario"]
+        # Contexto para el hash de contraseñas
+        self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        # Clave secreta para JWT (puedes guardarla en un archivo .env)
+        self.SECRET_KEY = "mi_clave_secreta"  # Cambia esto por una clave más segura
+        self.ALGORITHM = "HS256"
+
 
     #-------------------------------------------    
     def consultar_usuario_todo(self):
@@ -28,18 +39,21 @@ class InfraestructuraUsuario:
             self.client.close()
         return results
     #-------------------------------------------------------------------
-    def consultar_usuario_id(self, id:str):
+    def consultar_usuario_email(self, email: str):
         resultado = []
         try:
-            result = self.col.find(
+            result = self.col.find_one(
                 {
-                    "idUsuario": id
+                    "email": str(email)
                 })
-            for item in list(result):
-                resultado.append(ModeloUsuario.usuario_helper(item))
-            print(f"Consultar Usuario Id Exitoso")
+            if result:  # Verificar si se encontró un documento
+                resultado.append(ModeloUsuario.usuario_helper(result))
+                print("Consultar Usuario email Exitoso")
+            else:
+                print("Usuario no encontrado")
+                resultado = "Usuario no encontrado"
         except Exception as ex:
-            resultado = f"Consultar Usuario Id Fallido: {ex}"
+            resultado = f"Consultar Usuario email Fallido: {ex}"
         finally:
             self.client.close()
         return resultado
@@ -184,14 +198,41 @@ class InfraestructuraUsuario:
             if result:
                 # Verificar la contraseña usando bcrypt
                 if bcrypt.checkpw(contrasena.encode('utf-8'), result['contrasena'].encode('utf-8')):
-                    resultado = [f"Usuario verificado correctamente: {result['nombreUsuario']}"]
+                    resultado = ["Usuario verificado correctamente", result['email']]
                 else:
                     resultado = ["Contraseña incorrecta"]
             else:
-                resultado = "Usuario no encontrado"
+                resultado = ["Usuario no encontrado"]
         except Exception as ex:
             resultado = [f"Verificación de usuario fallida: {ex}"]
         finally:
             self.client.close()
 
         return resultado
+    # ----------------------------------------------------
+    def crear_token(self, data: dict):
+        to_encode = data.copy()
+        expiration = datetime.utcnow() + timedelta(hours=1)  # El token expirará en 1 hora
+        to_encode.update({"exp": expiration, "sub": data.get("email")})
+        return jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
+
+    # -----------------------------------------------------
+    def verificar_usuario_y_crear_token(self, email: str, contrasena: str):
+        try:
+            # Buscar el usuario por email
+            result = self.col.find_one({"email": email})
+
+            if result:
+                # Verificar la contraseña usando bcrypt
+                if bcrypt.checkpw(contrasena.encode('utf-8'), result['contrasena'].encode('utf-8')):
+                    # Generar token JWT
+                    token = self.crear_token({"sub": result['email']})
+                    return token  # Devolver el token al frontend
+                else:
+                    raise HTTPException(status_code=401, detail="Contraseña incorrecta")
+            else:
+                raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        except Exception as ex:
+            raise HTTPException(status_code=500, detail=f"Error al verificar usuario: {ex}")
+        
+    # ------------------------------------------------------------

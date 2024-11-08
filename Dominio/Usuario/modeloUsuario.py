@@ -27,6 +27,11 @@ class ModeloHistorialAlquiler(BaseModel):
     fechaInicio: datetime
     fechaFin: datetime
 
+class ModeloLogin(BaseModel):
+    email: str
+    contrasena: str
+
+
 class ModeloUsuario(BaseModel):
     _id: ObjectId
     IdUsuario: str
@@ -37,7 +42,6 @@ class ModeloUsuario(BaseModel):
     ganado: list[ModeloGanado]
     terreno: list[ModeloTerreno]
     historialAlquileres: list[ModeloHistorialAlquiler]
-    rol: str
     
 
     @staticmethod

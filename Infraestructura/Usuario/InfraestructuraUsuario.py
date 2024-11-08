@@ -9,8 +9,6 @@ import jwt
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 
-
-
 #------------------ Usuario ------------------#
 class InfraestructuraUsuario:
 
@@ -20,12 +18,12 @@ class InfraestructuraUsuario:
         self.col = self.db["Usuario"]
         # Contexto para el hash de contraseñas
         self.pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-        # Clave secreta para JWT (puedes guardarla en un archivo .env)
-        self.SECRET_KEY = "mi_clave_secreta"  # Cambia esto por una clave más segura
+        # Clave secreta para JWT
+        self.SECRET_KEY = "prueba" 
         self.ALGORITHM = "HS256"
 
 
-    #-------------------------------------------    
+    #------------------------------------- Consultar todos los usuarios -------------------------------    
     def consultar_usuario_todo(self):
         results = []
         try:
@@ -38,7 +36,8 @@ class InfraestructuraUsuario:
         finally:
             self.client.close()
         return results
-    #-------------------------------------------------------------------
+    
+    #------------------------------------- Consultar un usuario por email ------------------------------
     def consultar_usuario_email(self, email: str):
         resultado = []
         try:
@@ -46,7 +45,7 @@ class InfraestructuraUsuario:
                 {
                     "email": str(email)
                 })
-            if result:  # Verificar si se encontró un documento
+            if result: 
                 resultado.append(ModeloUsuario.usuario_helper(result))
                 print("Consultar Usuario email Exitoso")
             else:
@@ -57,14 +56,14 @@ class InfraestructuraUsuario:
         finally:
             self.client.close()
         return resultado
-    # --------------------------------------------------------------------------------
+    
+    # ----------------------------------- Ingresar Usuario ---------------------------------------------
     def ingresar_usuario(self, modelo_usuario: ModeloUsuario):
         resultado = []        
         try:
             # Hashear la contraseña usando bcrypt
             hashed_password = bcrypt.hashpw(modelo_usuario.contrasena.encode('utf-8'), bcrypt.gensalt())
 
-            
             # Preparar la estructura para insertar
             nuevo_usuario = {
                 "idUsuario": modelo_usuario.IdUsuario,
@@ -117,7 +116,8 @@ class InfraestructuraUsuario:
         
         return resultado
 
-    #---------------------------------------------
+    #------------------------------------ Modificar Usuario --------------------------------------------
+    # ASEGURATE DE CAMBIAR LA MODIFICACIÓN DE LA CONTRASEÑA DE FORMA CORRECTA
     def modificar_usuario(self, id:str, modelo_usuario: ModeloUsuario):
         resultado = []
         try:
@@ -174,6 +174,7 @@ class InfraestructuraUsuario:
             self.client.close()
         return resultado
 
+    # ----------------------------------- Eliminar usuario ---------------------------------------------
     def eliminar_usuario(self, id:str):
         resultado = []
         try:
@@ -188,7 +189,7 @@ class InfraestructuraUsuario:
             self.client.close()
         return resultado
     
-    # -------------------- Verificar Usuario ----------------------------
+    # ----------------------------------- Verificar Usuario --------------------------------------------
     def verificar_usuario(self, email: str, contrasena: str):
         resultado = []
         try:
@@ -209,14 +210,15 @@ class InfraestructuraUsuario:
             self.client.close()
 
         return resultado
-    # ----------------------------------------------------
+    
+    # ------------------------------------ Crear Token de Usuario --------------------------------------
     def crear_token(self, data: dict):
         to_encode = data.copy()
-        expiration = datetime.utcnow() + timedelta(hours=1)  # El token expirará en 1 hora
+        expiration = datetime.utcnow() + timedelta(hours=1) 
         to_encode.update({"exp": expiration, "sub": data.get("email")})
         return jwt.encode(to_encode, self.SECRET_KEY, algorithm=self.ALGORITHM)
 
-    # -----------------------------------------------------
+    # ------------------------------------ Verificar y crear Token -------------------------------------
     def verificar_usuario_y_crear_token(self, email: str, contrasena: str):
         try:
             # Buscar el usuario por email
@@ -235,4 +237,4 @@ class InfraestructuraUsuario:
         except Exception as ex:
             raise HTTPException(status_code=500, detail=f"Error al verificar usuario: {ex}")
         
-    # ------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------------

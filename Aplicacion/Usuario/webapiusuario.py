@@ -1,8 +1,6 @@
 # apiusuario:
-
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
-
-from Dominio.Usuario.modeloUsuario import ModeloUsuario
+from Dominio.Usuario.modeloUsuario import ModeloUsuario, ModeloLogin
 from Infraestructura.Usuario.infraestructuraUsuario import InfraestructuraUsuario
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt import PyJWTError, ExpiredSignatureError, decode
@@ -17,14 +15,13 @@ app: FastAPI = FastAPI(
 )
 
 app = APIRouter()
-###################################
+# ----------------------------------------------------------------------------------------
 
 def obtener_usuario_del_token(token: str = Depends(oauth2_scheme)):
     try:
         infraestructuraUsuario = InfraestructuraUsuario()
-        # Aquí el token ya es directamente el JWT, no es necesario el split
         payload = decode(token, infraestructuraUsuario.SECRET_KEY, algorithms=[infraestructuraUsuario.ALGORITHM])
-        email = payload.get("sub")  # El "sub" es el idUsuario
+        email = payload.get("sub")  # El "sub" es el email, esta en infraestructura crear token
         
         if email is None:
             raise HTTPException(status_code=401, detail="Usuario no encontrado en el token")
@@ -122,16 +119,16 @@ async def eliminar_usuario(id:str):
     tags=["Usuario"]
 
 )
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(modelologin: ModeloLogin):
     infraestructuraUsuario = InfraestructuraUsuario()
     
     # Verificar las credenciales del usuario
-    usuario_valido = infraestructuraUsuario.verificar_usuario(form_data.username, form_data.password)
+    usuario_valido = infraestructuraUsuario.verificar_usuario(modelologin.email, modelologin.contrasena)
     if usuario_valido[0] != "Usuario verificado correctamente":
         raise HTTPException(status_code=400, detail="Usuario o contraseña incorrectos")
     
     # Crear el token
-    token = infraestructuraUsuario.crear_token({"email": form_data.username})  # Cambia según cómo se crea el token en tu infraestructura
+    token = infraestructuraUsuario.crear_token({"email": modelologin.email})  
     return {"access_token": token, "token_type": "bearer"}
 
 # --------------------------------------------------------------------

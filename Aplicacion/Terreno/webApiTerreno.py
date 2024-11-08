@@ -1,7 +1,8 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, Depends
 
 from Dominio.Terreno.modeloTerreno import ModeloTerreno
 from Infraestructura.Terreno.infraestructuraTerreno import InfraestructuraTerreno
+from Aplicacion.Usuario.webApiusuario import obtener_usuario_del_token
 
 app: FastAPI = FastAPI(
     title= "API Terreno",
@@ -35,7 +36,7 @@ async def consultarTerrenoId(id:str):
     response_model= list,
     tags=["Terreno"]
 )
-async def ingresarTerreno(modeloTerreno : ModeloTerreno):
+async def ingresarTerreno(modeloTerreno: ModeloTerreno, token: str = Depends(obtener_usuario_del_token)):
     infraestructuraTerreno = InfraestructuraTerreno()
     return infraestructuraTerreno.ingresar_terreno(modeloTerreno)
 

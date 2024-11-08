@@ -132,13 +132,28 @@ async def login(modelologin: ModeloLogin):
     return {"access_token": token, "token_type": "bearer"}
 
 # --------------------------------------------------------------------
+
 @app.get(
     "/perfil",
     summary="Obtener Perfil",
-    description="obtener Usuario",
+    description="Obtener Usuario usando token",
     tags=["Usuario"]
 )
 async def obtener_perfil(email: str = Depends(obtener_usuario_del_token)):
-    email_decoded = unquote(email)
-    usuario = InfraestructuraUsuario().consultar_usuario_email(email_decoded)
+    # Aquí 'email' viene del token JWT decodificado en 'obtener_usuario_del_token'
+    usuario = InfraestructuraUsuario().consultar_usuario_email(email)
+    
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
     return usuario
+# -------------------------------------------------------------------
+@app.post(
+    "/añadirterrenoausuario",
+    summary="Obtener Perfil",
+    description="Obtener Usuario usando token",
+    tags=["Usuario"]
+)
+async def obtener_perfil(idUsuario, idTerreno):
+    infraestructuraUsuario=InfraestructuraUsuario()
+    return infraestructuraUsuario.agregar_terreno_a_usuario(idUsuario, idTerreno)

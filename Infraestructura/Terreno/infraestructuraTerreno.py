@@ -1,4 +1,5 @@
 from Dominio.Terreno.modeloTerreno import ModeloTerreno
+from Infraestructura.Usuario.infraestructuraUsuario import InfraestructuraUsuario
 from bson import ObjectId
 import pymongo
 import os
@@ -44,10 +45,10 @@ class InfraestructuraTerreno:
     
 
     # --------------------------------------------------------------------------------
-    def ingresar_terreno(self, modelo_terreno: ModeloTerreno):
+    def ingresar_terreno(self, modelo_terreno: ModeloTerreno, email: str):
         resultado = []
         try:            
-            nuevo_terreno={
+            nuevo_terreno = {
                 "idTerreno": modelo_terreno.idTerreno,
                 "ubicacion": {
                     "pais": modelo_terreno.ubicacion.pais,
@@ -61,18 +62,32 @@ class InfraestructuraTerreno:
                 "historialAlquileres": [
                     {
                         "idAlquiler": historial.idAlquiler,
-                        "usuario":{
+                        "usuario": {
                             "idUsuario": historial.usuario.idUsuario,
                             "nombreUsuario": historial.usuario.nombreUsuario
                         }
-                    }for historial in modelo_terreno.historialAlquileres
+                    } for historial in modelo_terreno.historialAlquileres
                 ],
                 "imagenes": modelo_terreno.imagenes
             }
+
             result = self.col.insert_one(nuevo_terreno)
-            resultado = [f"Ingresar Terreno Exitoso: {result.acknowledged}"]
+            if result.acknowledged:
+                # Agregar terreno al usuario usando el email
+                infraestructura_usuario = InfraestructuraUsuario()
+                usuario = infraestructura_usuario.consultar_usuario_email(email)
+                
+                if usuario and len(usuario) > 0:
+                    id_usuario = usuario[0]['idUsuario']  # Asegúrate de obtener el primer usuario si es una lista
+                    mensaje = infraestructura_usuario.agregar_terreno_a_usuario(id_usuario, modelo_terreno.idTerreno)
+                    resultado = mensaje  # Mensaje de agregar terreno al usuario
+                else:
+                    resultado = ["Usuario no encontrado."]
+            else:
+                resultado = ["Error al ingresar terreno."]
+        
         except Exception as ex:
-            resultado = f"Ingresar Terreno Fallido: {ex}"
+            resultado = [f"Ingresar Terreno Fallido: {ex}"]
         finally:
             self.client.close()
         

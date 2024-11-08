@@ -54,7 +54,7 @@ class InfraestructuraUsuario:
         except Exception as ex:
             resultado = f"Consultar Usuario email Fallido: {ex}"
         finally:
-            self.client.close()
+            pass
         return resultado
     
     # ----------------------------------- Ingresar Usuario ---------------------------------------------
@@ -237,4 +237,34 @@ class InfraestructuraUsuario:
         except Exception as ex:
             raise HTTPException(status_code=500, detail=f"Error al verificar usuario: {ex}")
         
-    # --------------------------------------------------------------------------------------------------
+    # ------------------------------------ Ingresar un terreno a un usuario -------------------------------------
+    def agregar_terreno_a_usuario(self, id_usuario: str, id_terreno: str):
+        resultado = []
+        try:
+            # Actualiza el documento del usuario y agrega el idTerreno en el array 'terreno'
+            result = self.col.update_one(
+                {"idUsuario": id_usuario},
+                {
+                    "$push": {
+                        "terreno": {"idTerreno": id_terreno}
+                    }
+                }
+            )
+
+            # Verifica si la operación fue exitosa
+            if result.acknowledged:
+                if result.modified_count > 0:
+                    resultado = ["Terreno añadido exitosamente."]
+                else:
+                    # Si no se modificó nada, es posible que el terreno ya esté presente
+                    resultado = ["El terreno ya estaba agregado o no se realizó ningún cambio."]
+            else:
+                resultado = ["La operación no fue reconocida por la base de datos."]
+            
+        except Exception as ex:
+            print(f"Error al agregar terreno al usuario: {ex}")
+            resultado = [f"Error al agregar terreno al usuario: {ex}"]
+        finally:
+            pass
+
+        return resultado

@@ -36,9 +36,9 @@ async def consultarTerrenoId(id:str):
     response_model= list,
     tags=["Terreno"]
 )
-async def ingresarTerreno(modeloTerreno: ModeloTerreno, token: str = Depends(obtener_usuario_del_token)):
+async def ingresarTerreno(modeloTerreno: ModeloTerreno, email: str = Depends(obtener_usuario_del_token)):
     infraestructuraTerreno = InfraestructuraTerreno()
-    return infraestructuraTerreno.ingresar_terreno(modeloTerreno)
+    return infraestructuraTerreno.ingresar_terreno(modeloTerreno, email)
 
 # ------------------ Modificar un terreno seleccionado -------------------------
 @app.put(

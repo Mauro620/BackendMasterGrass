@@ -34,19 +34,15 @@ container_client = blob_service_client.get_container_client(AZURE_CONTAINER_NAME
 async def upload_image(file: UploadFile, terreno_id: str):
     try:
         print(f"Connection String: {AZURE_CONNECTION_STRING}")
-        # Crear un nombre único para el archivo
         file_name = f"{uuid4()}-{file.filename}"
         
-        # Subir la imagen a Azure Blob Storage
         blob_client = container_client.get_blob_client(file_name)
         blob_client.upload_blob(file.file)
 
-        # Generar la URL del archivo subido
         file_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{AZURE_CONTAINER_NAME}/{file_name}"
-        # Actualizar el documento del terreno en MongoDB agregando la URL de la imagen
         result = col.update_one(
-            {"_id": ObjectId(terreno_id)}, 
-            {"$push": {"imagenes": file_url}}  # Agregar la nueva URL al array 'imagenes'
+            {"idTerreno": str(terreno_id)}, 
+            {"$push": {"imagenes": file_url}} 
         )
 
         if result.matched_count == 0:

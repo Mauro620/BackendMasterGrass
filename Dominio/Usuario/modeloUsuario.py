@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from bson import ObjectId
 from datetime import datetime
-from typing import List
+from typing import List,Optional
 
 class ModeloIndividuo(BaseModel):
     serieIndividuo: int
@@ -39,9 +39,9 @@ class ModeloUsuario(BaseModel):
     email: str
     contrasena: str
     telefono: str
-    ganado: list[ModeloGanado]
-    terreno: list[ModeloTerreno]
-    historialAlquileres: list[ModeloHistorialAlquiler]
+    ganado: Optional[list[ModeloGanado]] = []
+    terreno: Optional[list[ModeloTerreno]] = []
+    historialAlquileres: Optional[list[ModeloHistorialAlquiler]] =[]
     
 
     @staticmethod
@@ -65,7 +65,6 @@ class ModeloUsuario(BaseModel):
         ]
 
         return {
-            "_id": str(usuario['_id']),
             "idUsuario": str(usuario.get('idUsuario', '')),
             "nombreUsuario": str(usuario['nombreUsuario']),
             "email": str(usuario['email']),

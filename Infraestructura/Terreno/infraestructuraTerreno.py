@@ -3,6 +3,7 @@ from Infraestructura.Usuario.infraestructuraUsuario import InfraestructuraUsuari
 from bson import ObjectId
 import pymongo
 import os
+from azure.storage.blob import BlobServiceClient
 
 #------------------ Terreno ------------------#
 class InfraestructuraTerreno:
@@ -11,6 +12,10 @@ class InfraestructuraTerreno:
         self.client = pymongo.MongoClient(os.getenv("connection_string"))
         self.db = self.client[os.getenv("database_name")]
         self.col = self.db["Terreno"]
+        # AZURE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+        # AZURE_CONTAINER_NAME = os.getenv("AZURE_CONTAINER_NAME")
+        # self.blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+        # self.container_client = self.blob_service_client.get_container_client(AZURE_CONTAINER_NAME)
         
     def consultar_terreno_todo(self):
         results = []

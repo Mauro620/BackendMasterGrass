@@ -10,7 +10,7 @@ class ModeloTerreno(BaseModel):
     idTerreno: str
 
 class ModeloCuidados(BaseModel):
-    individuos: list[ModeloIndividuo] 
+    individuos: list[str] = []
     tituloCaso: str
     descripcion: str
 
@@ -19,7 +19,7 @@ class ModeloGanado(BaseModel):
     especie: str
     raza: str
     cantidad: int
-    registrarCuidadoEspecial: list[ModeloCuidados]
+    registrarCuidadoEspecial: list[ModeloCuidados] = []
 
 class ModeloHistorialAlquiler(BaseModel):
     idAlquiler: str

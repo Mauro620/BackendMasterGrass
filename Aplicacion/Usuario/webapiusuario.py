@@ -1,6 +1,6 @@
 # apiusuario:
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
-from Dominio.Usuario.modeloUsuario import ModeloUsuario, ModeloLogin
+from Dominio.Usuario.modeloUsuario import ModeloUsuario, ModeloLogin, ModeloGanado
 from Infraestructura.Usuario.infraestructuraUsuario import InfraestructuraUsuario
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt import PyJWTError, ExpiredSignatureError, decode
@@ -149,7 +149,7 @@ async def obtener_perfil(email: str = Depends(obtener_usuario_del_token)):
     return usuario
 # -------------------------------------------------------------------
 @app.post(
-    "/añadirterrenoausuario",
+    "/anadirterrenoausuario",
     summary="Obtener Perfil",
     description="Obtener Usuario usando token",
     tags=["Usuario"]
@@ -157,3 +157,13 @@ async def obtener_perfil(email: str = Depends(obtener_usuario_del_token)):
 async def obtener_perfil(idUsuario, idTerreno):
     infraestructuraUsuario=InfraestructuraUsuario()
     return infraestructuraUsuario.agregar_terreno_a_usuario(idUsuario, idTerreno)
+# -------------------------------------------------------------------
+@app.post(
+    "/anadirganadoausuario",
+    summary="Obtener Perfil",
+    description="Añadir ganado a un usuario",
+    tags=["Usuario"]
+)
+async def obtener_perfil(idUsuario, modelo_ganado: ModeloGanado):
+    infraestructuraUsuario=InfraestructuraUsuario()
+    return infraestructuraUsuario.agregar_ganado_a_usuario(idUsuario, modelo_ganado)

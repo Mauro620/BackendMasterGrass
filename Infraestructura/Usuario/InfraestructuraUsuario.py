@@ -1,4 +1,4 @@
-from Dominio.Usuario.modeloUsuario import ModeloUsuario
+from Dominio.Usuario.modeloUsuario import ModeloUsuario, ModeloGanado
 from bson import ObjectId
 import pymongo
 from typing import List
@@ -264,6 +264,53 @@ class InfraestructuraUsuario:
         except Exception as ex:
             print(f"Error al agregar terreno al usuario: {ex}")
             resultado = [f"Error al agregar terreno al usuario: {ex}"]
+        finally:
+            pass
+
+        return resultado
+    # --------------------------------- Ingresar Ganado a Usuario ----------------------------------------
+    def agregar_ganado_a_usuario(self, id_usuario: str, modelo_usuario: ModeloGanado):
+        resultado = []
+        try:
+            # Actualiza el documento del usuario y agrega el idTerreno en el array 'terreno'
+            result = self.col.update_one(
+                {"idUsuario": id_usuario},
+                {
+                    "$push": {
+                        "ganado": {
+                            "idGanado": modelo_usuario.idGanado,
+                            "especie": modelo_usuario.especie,
+                            "raza": modelo_usuario.raza,
+                            "cantidad": modelo_usuario.cantidad,
+                            "registrarCuidadoEspecial": [
+                                {
+                                "individuos": [
+                                    {"serieIndividuo": ind}  # Extraer el valor del objeto ModeloIndividuo
+                                    for ind in cu.individuos  # Recorre la lista de individuos en cada cuidado especial
+                                    ],
+                                    "tituloCaso": cu.tituloCaso,
+                                    "descripcion": cu.descripcion
+                                }
+                                for cu in modelo_usuario.registrarCuidadoEspecial  # Recorre los cuidados especiales
+                            ]
+                        }      
+                    }
+                }
+            )
+
+            # Verifica si la operación fue exitosa
+            if result.acknowledged:
+                if result.modified_count > 0:
+                    resultado = ["Ganado añadido exitosamente."]
+                else:
+                    # Si no se modificó nada, es posible que el terreno ya esté presente
+                    resultado = ["El ganado ya estaba agregado o no se realizó ningún cambio."]
+            else:
+                resultado = ["La operación no fue reconocida por la base de datos."]
+            
+        except Exception as ex:
+            print(f"Error al agregar ganado al usuario: {ex}")
+            resultado = [f"Error al agregar ganado al usuario: {ex}"]
         finally:
             pass
 

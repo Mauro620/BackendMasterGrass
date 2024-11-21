@@ -37,7 +37,7 @@ class InfraestructuraTerreno:
         try:
             result = self.col.find(
                 {
-                    "_id": ObjectId(id)
+                    "idTerreno": str(id)
                 })
             for item in list(result):
                 resultado.append(ModeloTerreno.terreno_helper(item))
@@ -48,6 +48,48 @@ class InfraestructuraTerreno:
             self.client.close()
         return resultado
     
+#-------------------------------------------------------------------
+ 
+    def filtrar_terrenos(
+        self,
+        ubicacion: str = None,
+        precio_min: float = None,
+        precio_max: float = None,
+        tamano_min: float = None,
+        tamano_max: float = None
+    ):
+        resultado = []
+        try:
+            query = {}
+
+            # Filtro por ubicación (ciudad o departamento)
+            if ubicacion is not None:
+                ubicacion_regex = {"$regex": ubicacion, "$options": "i"}
+                query["$or"] = [
+                    {"ubicacion.ciudad": ubicacion_regex},
+                    {"ubicacion.departamento": ubicacion_regex}
+                ]
+
+            # Filtros adicionales
+            if precio_min is not None:
+                query["precio"] = {"$gte": precio_min}
+            if precio_max is not None:
+                query.setdefault("precio", {}).update({"$lte": precio_max})
+            if tamano_min is not None:
+                query["tamano"] = {"$gte": tamano_min}
+            if tamano_max is not None:
+                query.setdefault("tamano", {}).update({"$lte": tamano_max})
+
+            result = self.col.find(query)
+            for item in list(result):
+                resultado.append(ModeloTerreno.terreno_helper(item))
+            print(f"Filtrar terreno Exitoso")
+        except Exception as ex:
+            resultado = [f"Filtrar Terreno fallido: {ex}"]
+        finally:
+            self.client.close()
+        return resultado
+
 
     # --------------------------------------------------------------------------------
     def ingresar_terreno(self, modelo_terreno: ModeloTerreno, email: str):

@@ -29,6 +29,20 @@ async def consultarTodosLosTerrenos():
 async def consultarTerrenoId(id:str):
     infraestructuraTerreno = InfraestructuraTerreno()
     return infraestructuraTerreno.consultar_terreno_id(id)
+# ------------------ Consultar terreno en especifico -------------------------
+@app.get(
+    "/filtrar_terrenos",
+    response_model= list,
+    tags=["Terreno"]
+)
+async def filtrarTerreno(
+    ubicacion: str = None,
+    precio_min: float = None,
+    precio_max: float = None,
+    tamano_min: float = None,
+    tamano_max: float = None):
+    infraestructuraTerreno = InfraestructuraTerreno()
+    return infraestructuraTerreno.filtrar_terrenos(ubicacion, precio_min, precio_max,tamano_min, tamano_max)
 
 # ------------------ Ingresar un nuevo terreno -------------------------
 @app.post(
